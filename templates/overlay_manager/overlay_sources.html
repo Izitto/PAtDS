@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overlay Sources</title>
+    <style>
+        /* Dark mode styles */
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        button {
+            background-color: #333;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            cursor: pointer;
+            margin: 5px;
+            padding: 10px 15px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #555;
+        }
+
+        select {
+            background-color: #333;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            padding: 10px;
+            margin: 5px;
+            width: 200px;
+        }
+
+        #overlayControls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        #sourcesList {
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 10px;
+        }
+
+        .sourceDiv {
+            border: 1px solid #444;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding: 10px;
+            align-items: center;
+        }
+
+        input[type="text"] {
+            background-color: #333;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            padding: 10px;
+            margin: 5px;
+            width: calc(50% - 15px);
+            /* Adjusting for margins */
+        }
+
+        #codeEditors {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        textarea {
+            background-color: #333;
+            border: none;
+            border-radius: 5px;
+            color: #fff;
+            flex: 1;
+            height: 200px;
+            margin: 5px;
+            padding: 10px;
+            width: calc(50% - 15px);
+            /* Adjusting for margins */
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- First div: Overlay controls -->
+    <div id="overlayControls">
+        <select id="overlaySelector"></select>
+        <button id="newOverlayBtn">New Overlay</button>
+        <button id="renameOverlayBtn">Rename Overlay</button>
+        <button id="deleteOverlayBtn">Delete Overlay</button>
+        <button id="duplicateOverlayBtn">Duplicate Overlay</button>
+        <button id="saveBtn">Save</button>
+        <button id="editLayoutBtn" onclick="location.href='/overlay/layout'">Edit Layout</button>
+    </div>
+
+    <!-- Second div: Sources list -->
+    <div id="sourcesList">
+        <!-- This will be populated dynamically with source divs -->
+    </div>
+    <button id="addSourceBtn">+ Add Source</button>
+
+    <!-- Script and Style editors -->
+    <div id="codeEditors">
+        <textarea id="scriptEditor" placeholder="Edit Script Here"></textarea>
+        <textarea id="styleEditor" placeholder="Edit Style Here"></textarea>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            let currentData = null;
+            let initialData = null; // To compare with currentData when exiting the page
+
+            async function fetchData() {
+                try {
+                    const response = await fetch('/api/overlay/get_sources');
+                    const data = await response.json();
+                    currentData = JSON.parse(JSON.stringify(data)); // Deep copy
+                    initialData = data;
+                    populateOverlays(data);
+                    populateSources(data.selected);
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                    promptNewOverlay();
+                }
+            }
+
+            function populateOverlays(data) {
+                const selector = document.getElementById('overlaySelector');
+                selector.innerHTML = '';
+                data.overlays.forEach(overlay => {
+                    const option = document.createElement('option');
+                    option.value = overlay.id;
+                    option.textContent = overlay.name;
+                    if (data.selected === overlay.id) {
+                        option.selected = true;
+                    }
+                    selector.appendChild(option);
+                });
+            }
+            function generateUUID() {
+                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+                    const r = Math.random() * 16 | 0,
+                        v = c === 'x' ? r : (r & 0x3 | 0x8);
+                    return v.toString(16);
+                });
+            }
+
+            function populateSources(selectedId) {
+                const sourcesDiv = document.getElementById('sourcesList');
+                sourcesDiv.innerHTML = '';
+                const selectedOverlay = currentData.overlays.find(o => o.id === selectedId);
+                selectedOverlay.sources.forEach((source, index) => {
+                    const sourceDiv = document.createElement('div');
+                    sourceDiv.className = 'sourceDiv';
+                    sourceDiv.innerHTML =
+                        `<button class="moveUpBtn" data-index="${index}">↑</button>
+                    <button class="moveDownBtn" data-index="${index}">↓</button>
+                    <button class="deleteSourceBtn" data-index="${index}">X</button>
+                    Name:<input type="text" class="sourceName" data-index="${index}" value="${source.name}">
+                    URL:<input type="text" class="sourceUrl" data-index="${index}" value="${source.url}">`;
+                    sourcesDiv.appendChild(sourceDiv);
+
+                    // Add event listeners to update currentData
+                    sourceDiv.querySelector('.sourceName').addEventListener('input', function (e) {
+                        const idx = parseInt(e.target.getAttribute('data-index'));
+                        selectedOverlay.sources[idx].name = e.target.value;
+                    });
+
+                    sourceDiv.querySelector('.sourceUrl').addEventListener('input', function (e) {
+                        const idx = parseInt(e.target.getAttribute('data-index'));
+                        selectedOverlay.sources[idx].url = e.target.value;
+                    });
+                });
+            }
+            document.getElementById('sourcesList').addEventListener('click', function (e) {
+                const selector = document.getElementById('overlaySelector');
+                const selectedId = parseInt(selector.value);
+                const selectedOverlay = currentData.overlays.find(o => o.id === selectedId);
+
+                if (e.target.classList.contains('moveUpBtn')) {
+                    const index = parseInt(e.target.getAttribute('data-index'));
+                    if (index > 0) {
+                        const temp = selectedOverlay.sources[index];
+                        selectedOverlay.sources[index] = selectedOverlay.sources[index - 1];
+                        selectedOverlay.sources[index - 1] = temp;
+                        populateSources(selectedId);
+                    }
+                } else if (e.target.classList.contains('moveDownBtn')) {
+                    const index = parseInt(e.target.getAttribute('data-index'));
+                    if (index < selectedOverlay.sources.length - 1) {
+                        const temp = selectedOverlay.sources[index];
+                        selectedOverlay.sources[index] = selectedOverlay.sources[index + 1];
+                        selectedOverlay.sources[index + 1] = temp;
+                        populateSources(selectedId);
+                    }
+                } else if (e.target.classList.contains('deleteSourceBtn')) {
+                    const confirmDelete = confirm('Are you sure you want to delete this source?');
+                    if (confirmDelete) {
+                        const index = parseInt(e.target.getAttribute('data-index'));
+                        selectedOverlay.sources.splice(index, 1);
+                        populateSources(selectedId);
+                    }
+                }
+            });
+            window.addEventListener('beforeunload', function (e) {
+                if (JSON.stringify(currentData) !== JSON.stringify(initialData)) {
+                    e.preventDefault();
+                    e.returnValue = 'You have unsaved changes. Do you want to leave?';
+                }
+            });
+            document.getElementById('editLayoutBtn').addEventListener('click', function () {
+                if (currentData.selected !== initialData.selected) {
+                    // Save the data if the selected overlay has changed
+                    // You can call the save function here
+
+                }
+            });
+            document.getElementById('renameOverlayBtn').addEventListener('click', function () {
+                const selector = document.getElementById('overlaySelector');
+                const selectedId = parseInt(selector.value);
+                const selectedOverlay = currentData.overlays.find(o => o.id === selectedId);
+
+                if (selectedOverlay) {
+                    const newName = prompt('Enter the new name for the overlay:', selectedOverlay.name);
+                    if (newName) {
+                        const nameExists = currentData.overlays.some(overlay => overlay.name === newName);
+                        if (nameExists) {
+                            alert('An overlay with this name already exists. Please choose a different name.');
+                            return;
+                        }
+                        selectedOverlay.name = newName;
+                        populateOverlays(currentData);
+                    }
+                }
+            });
+
+            document.getElementById('newOverlayBtn').addEventListener('click', function () {
+                const name = prompt('Enter the name of the new overlay:');
+                if (name) {
+                    const nameExists = currentData.overlays.some(overlay => overlay.name === name);
+                    if (nameExists) {
+                        alert('An overlay with this name already exists. Please choose a different name.');
+                        return;
+                    }
+                    const newId = Math.max(...currentData.overlays.map(o => o.id)) + 1; // Assign new id
+                    const newOverlay = {
+                        id: newId,
+                        uuid: generateUUID(),
+                        name: name,
+                        sources: [],
+                        script: "",
+                        style: "",
+                    };
+                    currentData.overlays.push(newOverlay);
+
+                    // Make the new overlay the currently selected one
+                    currentData.selected = newId;
+
+                    // Refresh the UI
+                    populateOverlays(currentData);
+                    populateSources(currentData.selected);
+                }
+            });
+
+
+
+            document.getElementById('deleteOverlayBtn').addEventListener('click', function () {
+                const confirmDelete = confirm('Are you sure you want to delete the selected overlay?');
+                if (confirmDelete) {
+                    const selector = document.getElementById('overlaySelector');
+                    const selectedId = parseInt(selector.value);
+                    const index = currentData.overlays.findIndex(o => o.id === selectedId);
+                    if (index !== -1) {
+                        currentData.overlays.splice(index, 1);
+                        populateOverlays(currentData);
+
+                        // If there are still overlays left, select the first one
+                        if (currentData.overlays.length > 0) {
+                            currentData.selected = currentData.overlays[0].id;
+                            populateSources(currentData.selected);
+                        } else {
+                            // If no overlays are left, prompt the user to create a new one
+                            promptNewOverlay();
+                        }
+                    }
+                }
+            });
+
+            document.getElementById('duplicateOverlayBtn').addEventListener('click', function () {
+                const selector = document.getElementById('overlaySelector');
+                const selectedId = parseInt(selector.value);
+                const originalOverlay = currentData.overlays.find(o => o.id === selectedId);
+                if (originalOverlay) {
+                    const name = prompt('Enter the name of the duplicated overlay:', originalOverlay.name + ' copy');
+                    if (name) {
+                        const nameExists = currentData.overlays.some(overlay => overlay.name === name);
+                        if (nameExists) {
+                            alert('An overlay with this name already exists. Please choose a different name.');
+                            return;
+                        }
+                        const duplicatedOverlay = JSON.parse(JSON.stringify(originalOverlay)); // Deep copy
+                        duplicatedOverlay.id = Math.max(...currentData.overlays.map(o => o.id)) + 1; // Assign new id
+                        duplicatedOverlay.name = name;
+                        duplicatedOverlay.uuid = generateUUID();  // New UUID for the duplicated overlay
+                        duplicatedOverlay.sources.forEach(source => {
+                            source.uuid = generateUUID();  // New UUID for each source in the duplicated overlay
+                        });
+
+                        // Add the duplicated overlay to currentData
+                        currentData.overlays.push(duplicatedOverlay);
+
+                        // Optionally, make the duplicated overlay the currently selected one
+                        currentData.selected = duplicatedOverlay.id;
+
+                        // Refresh the UI
+                        populateOverlays(currentData);
+                        populateSources(currentData.selected);
+                    }
+                }
+            });
+
+
+            document.getElementById('saveBtn').addEventListener('click', async function () {
+                try {
+                    const response = await fetch('/api/overlay/save_sources', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(currentData)
+                    });
+                    if (response.ok) {
+                        alert('Saved successfully!');
+                    } else {
+                        alert('Error saving data.');
+                    }
+                } catch (error) {
+                    console.error('Error saving data:', error);
+                }
+            });
+
+            document.getElementById('addSourceBtn').addEventListener('click', function () {
+                const selector = document.getElementById('overlaySelector');
+                const selectedId = parseInt(selector.value);
+                const selectedOverlay = currentData.overlays.find(o => o.id === selectedId);
+                if (selectedOverlay) {
+                    const newSource = {
+                        name: "",
+                        url: "",
+                        uuid: generateUUID(),
+                        id: selectedOverlay.sources.length + 1,
+                        x: 0,
+                        y: 0,
+                        width: 800,
+                        height: 600,
+                        scale: 1
+                    };
+                    selectedOverlay.sources.push(newSource);
+                    populateSources(selectedId);
+                }
+            });
+            document.getElementById('overlaySelector').addEventListener('change', function (e) {
+                const selectedId = parseInt(e.target.value);
+                currentData.selected = selectedId; // Update the selected overlay in currentData
+                populateSources(selectedId); // Repopulate the sources for the new selected overlay
+            });
+            async function fetchData() {
+                try {
+                    const response = await fetch('/api/overlay/get_sources');
+                    const data = await response.json();
+                    if (!data || !Array.isArray(data.overlays) || data.overlays.length === 0) {
+                        // No valid overlays found, prompt user to create a new one
+                        promptNewOverlay();
+                        return;
+                    }
+                    currentData = JSON.parse(JSON.stringify(data)); // Deep copy
+                    initialData = data;
+                    populateOverlays(data);
+                    populateSources(data.selected);
+                } catch (error) {
+                    console.error('Error fetching data:', error);
+                    promptNewOverlay();
+                }
+            }
+
+            function promptNewOverlay() {
+                const name = prompt('No overlays found. Please enter the name of a new overlay:');
+                if (name) {
+                    const newOverlay = {
+                        id: 1, // Starting from 1
+                        uuid: generateUUID(),
+                        name: name,
+                        sources: [],
+                        script: "",
+                        style: ""
+                    };
+                    currentData = {
+                        selected: 1,
+                        overlays: [newOverlay]
+                    };
+                    initialData = JSON.parse(JSON.stringify(currentData)); // Deep copy
+                    populateOverlays(currentData);
+                    populateSources(currentData.selected);
+                } else {
+                    // User didn't enter a name, re-prompt
+                    promptNewOverlay();
+                }
+            }
+
+            // Initial data fetch
+            fetchData();
+        });
+
+    </script>
+
+</body>
+
+</html>

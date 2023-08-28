@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>log files</title>
+	<style>
+		.container {
+			display: grid;
+			grid-template-columns: repeat(2, 1fr);
+			grid-gap: 20px;
+		}
+
+		.container>div {
+			padding: 5px;
+		}
+	</style>
+</head>
+<div>
+	<h1>Log files</h1>
+	<div class="container">
+	<div>
+		<h2>q log</h2>
+		<iframe id="frame0" src="{{url_for('static', filename='q_log.txt')}}" width="400" height="200"></iframe>
+		<br>
+		<input id="search0" type="text" placeholder="Search file1.txt">
+		<button onclick="refreshFrame(0)">Refresh</button>
+		<button onclick="search(0)">Search</button>
+	</div>
+	<div>
+		<h2>udp log</h2>
+		<iframe id="frame1" src="{{url_for('static', filename='udp_log.txt')}}" width="400" height="200"></iframe>
+		<br>
+		<input id="search1" type="text" placeholder="Search file2.txt">
+		<button onclick="refreshFrame(1)">Refresh</button>
+		<button onclick="search(1)">Search</button>
+	</div>
+	<div>
+		<h2>temp_log</h2>
+		<iframe id="frame2" src="{{url_for('static', filename='temp_log.txt')}}" width="400" height="200"></iframe>
+		<br>
+		<input id="search2" type="text" placeholder="Search file3.txt">
+		<button onclick="refreshFrame(2)">Refresh</button>
+		<button onclick="search(2)">Search</button>
+	</div>
+	<div>
+		<h2>flask log</h2>
+		<iframe id="frame3" src="{{url_for('static', filename='flask_log.txt')}}" width="400" height="200"></iframe>
+		<br>
+		<input id="search3" type="text" placeholder="Search file4.txt">
+		<button onclick="refreshFrame(3)">Refresh</button>
+		<button onclick="search(3)">Search</button>
+	</div>
+</div>
+<script>
+	function refreshFrame(frameIndex) {
+		// Get the iframe element by its index
+		var frame = document.getElementsByTagName('iframe')[frameIndex];
+		// Reload the iframe content
+		frame.contentWindow.location.reload(true);
+	}
+
+	function search(frameIndex) {
+		// Get the iframe element by its index
+		var frame = document.getElementsByTagName('iframe')[frameIndex];
+		// Get the search input element by its index
+		var searchInput = document.getElementsByTagName('input')[frameIndex];
+
+		// Get the search string from the input element
+		var searchString = searchInput.value.trim();
+
+		// Search the text of the iframe document
+		var iframeDoc = frame.contentDocument || frame.contentWindow.document;
+		var matches = iframeDoc.body.innerHTML.match(new RegExp(searchString, 'gi')) || [];
+
+		// Highlight the matches
+		iframeDoc.body.innerHTML = iframeDoc.body.innerHTML.replace(new RegExp(searchString, 'gi'), function (match) {
+			return '<mark>' + match + '</mark>';
+		});
+
+		// Update the number of matches in the input element
+		searchInput.placeholder = matches.length + ' matches found';
+	}
+</script>
+</body>
+
+</html>

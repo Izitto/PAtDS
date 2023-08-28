@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Render Overlays</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/obs-websocket-js/4.0.1/obs-websocket.min.js"></script>
+    <style>
+        body {
+            height: 1080;
+            width: 1920;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        let overlayUUID = "{{ overlay_uuid }}";  // Passed from Flask
+        let overlayData = null;
+    
+        async function fetchOverlayData() {
+            try {
+                const response = await fetch('/api/overlay/get_sources');
+                const data = await response.json();
+                overlayData = data.overlays.find(o => o.uuid === overlayUUID);
+                renderOverlay();
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+    
+        function renderOverlay() {
+            if (overlayData) {
+                overlayData.sources.forEach(source => {
+                    const iframe = document.createElement('iframe');
+                    iframe.src = source.url;
+                    iframe.style.position = "absolute";
+                    iframe.style.top = `${source.y}px`;
+                    iframe.style.left = `${source.x}px`;
+                    iframe.style.width = `${source.width}px`;
+                    iframe.style.height = `${source.height}px`;
+                    iframe.style.transform = `scale(${source.scale})`;
+                    iframe.id = source.name;  // Set the ID to the source name
+                    iframe.frameBorder = 0;
+                    iframe.scrolling = "no";
+                    iframe.style.transformOrigin = "top left";
+                    iframe.zIndex = source.name.replace(/ /g, "_").toLowerCase();
+                    document.body.appendChild(iframe);
+                });
+            }
+        }
+    
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchOverlayData();
+        });
+    </script>
+    
+</body>
+
+</html>
