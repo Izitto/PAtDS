@@ -43,4 +43,5 @@ def before_request():
     ip_address = request.remote_addr
     if not is_local_ip(ip_address):
         if 'ip_address' not in session or session['ip_address'] != ip_address:
-            return redirect(url_for('password_prompt'))
+            if request.endpoint not in ['password_prompt', 'verify_password']:
+                return redirect(url_for('password_prompt'))
