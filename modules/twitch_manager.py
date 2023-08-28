@@ -8,7 +8,7 @@ from app import app
 
 twitch_configs = {}
 try:
-    with open("path/to/your/json/file.json", "r") as f:
+    with open("/home/izitto/Documents/Code/PAtDS/twitch_configs.json", "r") as f:
         content = f.read().strip()  # Remove leading/trailing whitespace
         if content:  # Check if the file is empty
             twitch_configs = json.loads(content)
