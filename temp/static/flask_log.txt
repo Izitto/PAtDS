@@ -1,6 +1,0 @@
-the flask app has started
-friend queue is empty
-Client connected
-friend queue is empty
-friend queue is empty
-friend queue is empty

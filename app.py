@@ -29,7 +29,7 @@ def verify_password_route():
     if verify_password(password):
         session['ip_address'] = ip_address
         flash('Password is correct!', 'success')
-        return redirect(url_for('/'))
+        return redirect(url_for('index'))
     else:
         flash('Password is incorrect!', 'error')
         return redirect(url_for('password_prompt'))
