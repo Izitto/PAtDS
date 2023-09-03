@@ -1,5 +1,6 @@
 
 # control system
+
 import keyboard
 import sys
 import control.USB_switch as USB
@@ -11,203 +12,167 @@ import os
 import threading
 import modules.shared as shared
 
+class ControlSystem:
+    def __init__(self):
+        self.screen = 1
+        self.ccard = 1
+        self.command_map = {
+            "start": self.start,
+            "switch_usb": self.switch_usb,
+            "start_main": self.start_main,
+            "start_game": self.start_game,
+            "HDMI_A1": self.hdmi_a1,
+            "HDMI_A2": self.hdmi_a2,
+            "HDMI_A3": self.hdmi_a3,
+            "HDMI_A4": self.hdmi_a4,
+            "HDMI_B1": self.hdmi_b1,
+            "HDMI_B2": self.hdmi_b2,
+            "HDMI_B3": self.hdmi_b3,
+            "HDMI_B4": self.hdmi_b4,
+            "reboot": self.reboot
+        }
 
-screen = 1
-ccard = 1
+    def execute_command(self, term):
+        func = self.command_map.get(term, None)
+        if func:
+            func()
+        else:
+            print("No command found")
 
-def commands(term):
-    global screen, ccard
-    def start():
-        global screen, ccard
+    def start(self):
         try:
-            screen == 1
-            ccard == 1
+            self.screen = 1
+            self.ccard = 1
             HDMI.a1()
             HDMI.b1()
             sleep(1.5)
         except Exception as e:
-            print("problem with setting initual screen and card state: " + str(e))
+            print(f"Problem with setting initial screen and card state: {e}")
         sleep(0.5)
-    def switch_usb():
+
+    def switch_usb(self):
         try:
             USB.run()
         except Exception as e:
-            print("problem with usb switch: " + str(e))
+            print(f"Problem with USB switch: {e}")
         sleep(0.5)
-    def start_main():
+
+    def start_main(self):
         try:
             main.run()
         except Exception as e:
-            print("problem with starting main pc: " + str(e))
+            print(f"Problem with starting main PC: {e}")
         sleep(0.5)
-    def start_game():
+
+    def start_game(self):
         try:
             game.run()
         except Exception as e:
-            print("problem with starting game pc: " + str(e))
+            print(f"Problem with starting game PC: {e}")
         sleep(0.5)
 
-    def HDMI_A1():
-        global screen, ccard
+    def hdmi_a1(self):
         try:
-            screen = 1
-            
+            self.screen = 1
             HDMI.a1()
         except Exception as e:
-            print("problem with HDMI A1: " + str(e))
+            print(f"Problem with HDMI A1: {e}")
         sleep(0.5)
-    def HDMI_A2():
-        global screen, ccard
+
+    def hdmi_a2(self):
         try:
-            screen = 2
+            self.screen = 2
             HDMI.a2()
         except Exception as e:
-            print("problem with HDMI A2: " + str(e))
+            print(f"Problem with HDMI A2: {e}")
         sleep(0.5)
-    def HDMI_A3():
-        global screen, ccard
+
+    def hdmi_a3(self):
         try:
-            screen = 3
+            self.screen = 3
             HDMI.a3()
         except Exception as e:
-            print("problem with HDMI A3: " + str(e))
+            print(f"Problem with HDMI A3: {e}")
         sleep(0.5)
-    def HDMI_A4():
-        global screen, ccard
+
+    def hdmi_a4(self):
         try:
-            screen = 4
+            self.screen = 4
             HDMI.a4()
         except Exception as e:
-            print("problem with HDMI A4: " + str(e))
+            print(f"Problem with HDMI A4: {e}")
         sleep(0.5)
-    def HDMI_B1():
-        global screen, ccard
+
+    def hdmi_b1(self):
         try:
-            ccard = 1
+            self.ccard = 1
             HDMI.b1()
         except Exception as e:
-            print("problem with HDMI B1: " + str(e))
+            print(f"Problem with HDMI B1: {e}")
         sleep(0.5)
-    def HDMI_B2():
-        global screen, ccard
+
+    def hdmi_b2(self):
         try:
-            ccard = 2
+            self.ccard = 2
             HDMI.b2()
         except Exception as e:
-            print("problem with HDMI B2: " + str(e))
+            print(f"Problem with HDMI B2: {e}")
         sleep(0.5)
-    def HDMI_B3():
-        global screen, ccard
+
+    def hdmi_b3(self):
         try:
-            ccard = 3
+            self.ccard = 3
             HDMI.b3()
         except Exception as e:
-            print("problem with HDMI B3: " + str(e))
+            print(f"Problem with HDMI B3: {e}")
         sleep(0.5)
-    def HDMI_B4():
-        global screen, ccard
+
+    def hdmi_b4(self):
         try:
-            ccard = 4
+            self.ccard = 4
             HDMI.b4()
         except Exception as e:
-            print("problem with HDMI B4: " + str(e))
+            print(f"Problem with HDMI B4: {e}")
         sleep(0.5)
-    def reboot():
+
+    def reboot(self):
         try:
             os.system("sudo reboot")
         except Exception as e:
-            print("problem with reboot: " + str(e))
+            print(f"Problem with reboot: {e}")
         sleep(0.5)
 
-    
-
-
-    
-    if term == "start":
-        start()
-    elif term == "switch_usb":
-        switch_usb()
-    elif term == "start_main":
-        start_main()
-    elif term == "start_game":
-        start_game()
-    elif term == "HDMI_A1":
-        HDMI_A1()
-    elif term == "HDMI_A2":
-        HDMI_A2()
-    elif term == "HDMI_A3":
-        HDMI_A3()
-    elif term == "HDMI_A4":
-        HDMI_A4()
-    elif term == "HDMI_B1":
-        HDMI_B1()
-    elif term == "HDMI_B2":
-        HDMI_B2()
-    elif term == "HDMI_B3":
-        HDMI_B3()
-    elif term == "HDMI_B4":
-        HDMI_B4()
-    elif term == "reboot":
-        reboot()
-    else:
-        print("no command found")
-    
-    shared.emit_socketio_event('HDMI_updated', {'message': 'HDMI updated'})
-    shared.emit_socketio_event('HDMI_updated', {'message': ''})
-
-        
-
-def thread_control():
+def thread_control(control_system):
     sys.stdout = open("/home/izitto/Desktop/Code/PAtDS/static/log.txt", "w")
-    global screen, ccard
-    commands("start")
-    
-
+    control_system.execute_command("start")
 
     while True:
         if keyboard.is_pressed(98):
-            commands("switch_usb")
+            control_system.execute_command("switch_usb")
         if keyboard.is_pressed(55):
-            commands("start_main")
+            control_system.execute_command("start_main")
         if keyboard.read_key() == "-":
-            commands("start_game")
+            control_system.execute_command("start_game")
         if keyboard.read_key() == "7":
-            commands("HDMI_A1")
+            control_system.execute_command("HDMI_A1")
         if keyboard.read_key() == "8":
-            commands("HDMI_A2")
+            control_system.execute_command("HDMI_A2")
         if keyboard.read_key() == "9":
-            commands("HDMI_A3")
+            control_system.execute_command("HDMI_A3")
         if keyboard.read_key() == "+":
-            commands("HDMI_A4")
+            control_system.execute_command("HDMI_A4")
         if keyboard.read_key() == "4":
-            commands("HDMI_B1")
+            control_system.execute_command("HDMI_B1")
         if keyboard.read_key() == "5":
-            commands("HDMI_B2")
+            control_system.execute_command("HDMI_B2")
         if keyboard.read_key() == "6":
-            commands("HDMI_B3")
+            control_system.execute_command("HDMI_B3")
         if keyboard.read_key() == "backspace":
-            commands("HDMI_B4")
+            control_system.execute_command("HDMI_B4")
         if keyboard.read_key() == ".":
-            commands("reboot")
-        if keyboard.read_key() == "1":
-            pass
-        if keyboard.read_key() == "2":
-            pass
-        if keyboard.read_key() == "0":
-            pass
+            control_system.execute_command("reboot")
 
-
-con = threading.Thread(target=thread_control)
-def start():
+if __name__ == "__main__":
+    control_system = ControlSystem()
+    con = threading.Thread(target=thread_control, args=(control_system,))
     con.start()
-
-def join():
-    con.join()
-
-def getScreens():
-    global screen
-    return screen
-
-def getCCard():
-    global ccard
-    return ccard

@@ -2,42 +2,36 @@ from flask import render_template, request
 from app import app
 import modules.Control as Control
 import os
-
+control_system = Control.ControlSystem()
 
 #      main routes for the web app
 @app.route("/")
 def index():
     return render_template('index.html')
+
+
+# Mapping from button names to command_map keys
+button_to_command = {
+    "A1": "HDMI_A1",
+    "A2": "HDMI_A2",
+    "A3": "HDMI_A3",
+    "A4": "HDMI_A4",
+    "Boot Main PC": "start_main",
+    "B1": "HDMI_B1",
+    "B2": "HDMI_B2",
+    "B3": "HDMI_B3",
+    "B4": "HDMI_B4",
+    "Switch USB": "switch_usb",
+    "Restart Service": "restart_service",  # Update this if you have a corresponding command
+    "Reboot Device": "reboot"
+}
 @app.route('/control', methods=['GET', 'POST'])
 def patds():
     if request.method == 'POST':
-        if request.form['button'] == 'Switch USB':
-            Control.commands("switch_usb")
-        if request.form['button'] == 'Boot Main PC':
-            Control.commands("start_main")
-        if request.form['button'] == 'Boot Game PC':
-            Control.commands("start_game")
-        if request.form['button'] == 'A1':
-            Control.commands("HDMI_A1")
-        if request.form['button'] == 'A2':
-            Control.commands("HDMI_A2")
-        if request.form['button'] == 'A3':
-            Control.commands("HDMI_A3")
-        if request.form['button'] == 'A4':
-            Control.commands("HDMI_A4")
-        if request.form['button'] == 'B1':
-            Control.commands("HDMI_B1")
-        if request.form['button'] == 'B2':
-            Control.commands("HDMI_B2")
-        if request.form['button'] == 'B3':
-            Control.commands("HDMI_B3")
-        if request.form['button'] == 'B4':
-            Control.commands("HDMI_B4")
-        if request.form['button'] == 'Restart Service':
-            os.system("sudo systemctl restart PatDS.service")
-        if request.form['button'] == 'Reboot Device':
-            os.system("sudo reboot")
-
+        button = request.form['button']
+        command = button_to_command.get(button, None)
+        if command:
+            control_system.execute_command(command)
     return render_template('patds.html', methods = ['GET', 'POST', 'DELETE'])
 
 @app.route('/thumbnailmaker', methods=['GET', 'POST'])
