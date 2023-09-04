@@ -22,9 +22,9 @@ except Exception as e:
 
 @app.route('/twitch/home')
 def twitch_home():
-    return render_template('twitch_manager/twitch_home.html')
+    return render_template('twitch_manager/home.html')
 
 
 @app.route('/twitch/redeems')
 def twitch_redeems():
-    return render_template('twitch_manager/twitch_redeems.html')
+    return render_template('twitch_manager/redeems.html')

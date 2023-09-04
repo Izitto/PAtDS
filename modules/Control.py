@@ -1,4 +1,3 @@
-
 # control system
 
 import keyboard
@@ -28,28 +27,23 @@ def commands(term):
             ccard == 1
             HDMI.a1()
             HDMI.b1()
-            sleep(1.5)
         except Exception as e:
             print("problem with setting initual screen and card state: " + str(e))
-        sleep(0.5)
     def switch_usb():
         try:
             USB.run()
         except Exception as e:
             print("problem with usb switch: " + str(e))
-        sleep(0.5)
     def start_main():
         try:
             main.run()
         except Exception as e:
             print("problem with starting main pc: " + str(e))
-        sleep(0.5)
     def start_game():
         try:
             game.run()
         except Exception as e:
             print("problem with starting game pc: " + str(e))
-        sleep(0.5)
 
     def HDMI_A1():
         global screen, ccard
@@ -59,7 +53,6 @@ def commands(term):
             HDMI.a1()
         except Exception as e:
             print("problem with HDMI A1: " + str(e))
-        sleep(0.5)
     def HDMI_A2():
         global screen, ccard
         try:
@@ -67,7 +60,7 @@ def commands(term):
             HDMI.a2()
         except Exception as e:
             print("problem with HDMI A2: " + str(e))
-        sleep(0.5)
+        
     def HDMI_A3():
         global screen, ccard
         try:
@@ -75,7 +68,7 @@ def commands(term):
             HDMI.a3()
         except Exception as e:
             print("problem with HDMI A3: " + str(e))
-        sleep(0.5)
+        
     def HDMI_A4():
         global screen, ccard
         try:
@@ -83,7 +76,7 @@ def commands(term):
             HDMI.a4()
         except Exception as e:
             print("problem with HDMI A4: " + str(e))
-        sleep(0.5)
+        
     def HDMI_B1():
         global screen, ccard
         try:
@@ -91,7 +84,7 @@ def commands(term):
             HDMI.b1()
         except Exception as e:
             print("problem with HDMI B1: " + str(e))
-        sleep(0.5)
+        
     def HDMI_B2():
         global screen, ccard
         try:
@@ -99,7 +92,7 @@ def commands(term):
             HDMI.b2()
         except Exception as e:
             print("problem with HDMI B2: " + str(e))
-        sleep(0.5)
+        
     def HDMI_B3():
         global screen, ccard
         try:
@@ -107,7 +100,7 @@ def commands(term):
             HDMI.b3()
         except Exception as e:
             print("problem with HDMI B3: " + str(e))
-        sleep(0.5)
+        
     def HDMI_B4():
         global screen, ccard
         try:
@@ -115,13 +108,13 @@ def commands(term):
             HDMI.b4()
         except Exception as e:
             print("problem with HDMI B4: " + str(e))
-        sleep(0.5)
+        
     def reboot():
         try:
             os.system("sudo reboot")
         except Exception as e:
             print("problem with reboot: " + str(e))
-        sleep(0.5)
+        
 
     
 
@@ -215,4 +208,3 @@ def getScreens():
 def getCCard():
     global ccard
     return ccard
-    
