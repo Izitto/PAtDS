@@ -14,8 +14,6 @@ viewer = shared.viewer
 friend = shared.friend
 import os
 
-control_system = control.ControlSystem()
-
 # route for audio files
 @app.route('/api/audio/<filename>', methods=['GET'])
 def get_audio(filename):
@@ -74,22 +72,12 @@ def save_temp_bg():
 
 
 
-'''@app.route('/api/commands', methods=['POST'])
+@app.route('/api/commands', methods=['POST'])
 def commands():
     print("Called: /api/commands")
     term = request.form['term']
     control.commands(term)
     return jsonify(screen=control.screen, ccard=control.ccard)
-
-'''
-
-
-@app.route('/api/commands', methods=['POST'])
-def commands():
-    term = request.form['term']
-    control_system.execute_command(term)
-    return jsonify(screen=control_system.screen, ccard=control_system.ccard)
-
 
 
 

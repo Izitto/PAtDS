@@ -2,7 +2,6 @@ from flask import render_template, request
 from app import app
 import modules.Control as Control
 import os
-control_system = Control.ControlSystem()
 
 #      main routes for the web app
 @app.route("/")
@@ -31,7 +30,7 @@ def patds():
         button = request.form['button']
         command = button_to_command.get(button, None)
         if command:
-            control_system.execute_command(command)
+            Control.commands(command)
     return render_template('patds.html', methods = ['GET', 'POST', 'DELETE'])
 
 @app.route('/thumbnailmaker', methods=['GET', 'POST'])
