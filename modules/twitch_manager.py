@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template, redirect, url_for
+from flask import Flask, jsonify, request, render_template, redirect, url_for, flash
 import requests
 import json
 import os
@@ -7,17 +7,23 @@ from twitchio.ext import commands
 
 
 # Load Twitch Configurations
-
 twitch_configs = {}
+config_missing = False  # New variable to track missing configs
+
 try:
     with open("/home/izitto/Documents/Code/PAtDS/twitch_configs.json", "r") as f:
-        content = f.read().strip()  # Remove leading/trailing whitespace
-        if content:  # Check if the file is empty
+        content = f.read().strip()
+        if content:
             twitch_configs = json.loads(content)
 except json.JSONDecodeError:
     print("JSON Decode Error: The file is not a valid JSON. Using default settings.")
 except Exception as e:
     print(f"An unexpected error occurred: {e}")
+
+# Check if required configs are missing
+if not twitch_configs.get('client_id') or not twitch_configs.get('irc_token'):
+    config_missing = True  # Update the variable if configs are missing
+
 
 # Initialize Twitch Bot
 twitch_bot = commands.Bot(
@@ -49,6 +55,8 @@ async def update_twitch_info(title, category):
 
 @app.route('/twitch/home')
 def twitch_home():
+    if config_missing:
+        flash('Twitch configurations are missing. Please enter them.', 'warning')
     # Your code to get Twitch stream title, category, and live status
     title = "Your Stream Title"
     category = "Your Stream Category"
@@ -60,3 +68,22 @@ def twitch_home():
 @app.route('/twitch/redeems')
 def twitch_redeems():
     return render_template('twitch_manager/redeems.html')
+
+
+@app.route('/save_twitch_configs', methods=['POST'])
+def save_twitch_configs():
+    global twitch_configs, config_missing  # Declare them as global to modify
+    client_id = request.form.get('client_id')
+    irc_token = request.form.get('irc_token')
+    
+    twitch_configs['client_id'] = client_id
+    twitch_configs['irc_token'] = irc_token
+    
+    # Save to file
+    try:
+        with open("/home/izitto/Documents/Code/PAtDS/twitch_configs.json", "w") as f:
+            json.dump(twitch_configs, f)
+        config_missing = False  # Update the flag
+        return jsonify({'status': 'success'})
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)})
