@@ -1,8 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Twitch Settings</title>
+    <title>Twitch Manager</title>
+    <script>
+        // Your JavaScript code to update the page dynamically
+    </script>
 </head>
 <body>
+    <h1>Twitch Manager</h1>
+    <p>Stream Title: {{ title }}</p>
+    <p>Stream Category: {{ category }}</p>
+    <p>Live Status: {{ live_status }}</p>
+    <form action="/update_twitch_info" method="post">
+        <label for="new_title">New Title:</label>
+        <input type="text" id="new_title" name="new_title">
+        <label for="new_category">New Category:</label>
+        <input type="text" id="new_category" name="new_category">
+        <input type="submit" value="Update">
+    </form>
 </body>
 </html>
