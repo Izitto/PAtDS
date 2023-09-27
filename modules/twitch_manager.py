@@ -9,7 +9,7 @@ from twitchio.ext import commands
 # Load Twitch Configurations
 twitch_configs = {}
 config_missing = False  # New variable to track missing configs
-
+twitch_bot = None
 try:
     with open("/home/izitto/Documents/Code/PAtDS/twitch_configs.json", "r") as f:
         content = f.read().strip()
@@ -25,14 +25,17 @@ if not twitch_configs.get('client_id') or not twitch_configs.get('irc_token'):
     config_missing = True  # Update the variable if configs are missing
 
 
-# Initialize Twitch Bot
-twitch_bot = commands.Bot(
-    irc_token=twitch_configs.get('irc_token', ''),
-    client_id=twitch_configs.get('client_id', ''),
-    nick=twitch_configs.get('nick', ''),
-    prefix=twitch_configs.get('prefix', '!'),
-    initial_channels=[twitch_configs.get('channel', '')]
-)
+# Function to initialize Twitch Bot
+def initialize_twitch_bot():
+    global twitch_bot
+    twitch_bot = commands.Bot(
+        irc_token=twitch_configs.get('irc_token', ''),
+        client_id=twitch_configs.get('client_id', ''),
+        nick=twitch_configs.get('nick', ''),
+        prefix=twitch_configs.get('prefix', '!'),
+        initial_channels=[twitch_configs.get('channel', '')]
+    )
+
 
 
 
@@ -70,7 +73,7 @@ def twitch_redeems():
     return render_template('twitch_manager/redeems.html')
 
 
-@app.route('/save_twitch_configs', methods=['POST'])
+@app.route('/twitch/save_twitch_configs', methods=['POST'])
 def save_twitch_configs():
     global twitch_configs, config_missing  # Declare them as global to modify
     client_id = request.form.get('client_id')
@@ -84,6 +87,17 @@ def save_twitch_configs():
         with open("/home/izitto/Documents/Code/PAtDS/twitch_configs.json", "w") as f:
             json.dump(twitch_configs, f)
         config_missing = False  # Update the flag
+        initialize_twitch_bot()  # Initialize the Twitch Bot here
         return jsonify({'status': 'success'})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)})
+
+
+@app.route('/twitch/get_twitch_info', methods=['GET'])
+def get_twitch_info():
+    # Your code to get Twitch stream title, category, and live status
+    title = "Your Updated Stream Title"
+    category = "Your Updated Stream Category"
+    live_status = "Live or Offline"
+    
+    return jsonify({'title': title, 'category': category, 'live_status': live_status})
