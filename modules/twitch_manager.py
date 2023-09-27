@@ -9,7 +9,7 @@ from twitchio.ext import commands
 # Load Twitch Configurations
 twitch_configs = {}
 config_missing = False  # New variable to track missing configs
-twitch_bot = None
+twitch_bot = initialize_twitch_bot()
 try:
     with open("/home/izitto/Documents/Code/PAtDS/twitch_configs.json", "r") as f:
         content = f.read().strip()
@@ -27,14 +27,14 @@ if not twitch_configs.get('client_id') or not twitch_configs.get('irc_token'):
 
 # Function to initialize Twitch Bot
 def initialize_twitch_bot():
-    global twitch_bot
-    twitch_bot = commands.Bot(
+    bot = commands.Bot(
         irc_token=twitch_configs.get('irc_token', ''),
         client_id=twitch_configs.get('client_id', ''),
         nick=twitch_configs.get('nick', ''),
         prefix=twitch_configs.get('prefix', '!'),
         initial_channels=[twitch_configs.get('channel', '')]
     )
+    return bot
 
 def fetch_twitch_stream_data():
     headers = {
