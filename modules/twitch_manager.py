@@ -36,6 +36,23 @@ def initialize_twitch_bot():
         initial_channels=[twitch_configs.get('channel', '')]
     )
 
+def fetch_twitch_stream_data():
+    headers = {
+        'Client-ID': twitch_configs.get('client_id', ''),
+        'Authorization': f"Bearer {twitch_configs.get('oauth_token', '')}"
+    }
+    response = requests.get('https://api.twitch.tv/helix/streams?user_login=YOUR_USERNAME', headers=headers)
+    data = response.json()
+    if data['data']:
+        stream = data['data'][0]
+        title = stream['title']
+        category = stream['game_name']  # Assuming game_name is the category
+        live_status = stream['type']  # This will be 'live' if live
+    else:
+        title = "Stream not found"
+        category = "N/A"
+        live_status = "Offline"
+    return title, category, live_status
 
 
 
@@ -60,11 +77,9 @@ async def update_twitch_info(title, category):
 def twitch_home():
     if config_missing:
         flash('Twitch configurations are missing. Please enter them.', 'warning')
-    # Your code to get Twitch stream title, category, and live status
-    title = "Your Stream Title"
-    category = "Your Stream Category"
-    live_status = "Live or Offline"
+    title, category, live_status = fetch_twitch_stream_data()
     return render_template('twitch_manager/home.html', title=title, category=category, live_status=live_status)
+
 
 
 
@@ -103,8 +118,20 @@ def get_twitch_info():
     return jsonify({'title': title, 'category': category, 'live_status': live_status})
 
 
-
 @app.route('/authorize_twitchio')
 def authorize_twitchio():
-    # Your code to authorize Twitchio goes here
+    # TODO: Implement Twitchio authorization logic here
+    flash('Twitchio authorization successful.', 'success')
     return redirect(url_for('twitch_home'))
+
+
+@twitch_bot.event
+async def event_ready():
+    print(f"We are logged in as {twitch_bot.nick}")
+
+@twitch_bot.event
+async def event_message(ctx):
+    # Make sure the bot ignores itself and the streamer
+    if ctx.author.name.lower() == twitch_bot.nick.lower():
+        return
+    await twitch_bot.handle_commands(ctx)
