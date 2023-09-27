@@ -101,3 +101,10 @@ def get_twitch_info():
     live_status = "Live or Offline"
     
     return jsonify({'title': title, 'category': category, 'live_status': live_status})
+
+
+
+@app.route('/authorize_twitchio')
+def authorize_twitchio():
+    # Your code to authorize Twitchio goes here
+    return redirect(url_for('twitch_home'))

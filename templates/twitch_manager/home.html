@@ -5,7 +5,16 @@
     <title>Twitch Manager</title>
 </head>
 <body>
-    
-</body>
+    <h1>Twitch Manager</h1>
+    <p>Stream Title: {{ title }}</p>
+    <p>Stream Category: {{ category }}</p>
+    <p>Live Status: {{ live_status }}</p>
 
+    {% if config_missing %}
+        <p>Twitchio is not authorized.</p>
+        <button onclick="location.href='{{ url_for('authorize_twitchio') }}'">Authorize Twitchio</button>
+    {% else %}
+        <p>Twitchio is authorized.</p>
+    {% endif %}
+</body>
 </html>
