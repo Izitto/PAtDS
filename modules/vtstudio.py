@@ -43,3 +43,13 @@ class VTubeStudioAPI:
         # Use the EventSubscriptionRequest as mentioned in the documentation
         # You can subscribe to multiple events like ModelLoadedEvent, HotkeyTriggeredEvent, etc.
         # When an event is triggered, use the emit_socketio_event from shared.py to send a socket event
+
+    def handle_event(self, event_data):
+        # Parse the event_data to determine the type of event
+        event_type = event_data.get("messageType")
+        if event_type == "ModelLoadedEvent":
+            emit_socketio_event("model_loaded", event_data)
+        elif event_type == "HotkeyTriggeredEvent":
+            emit_socketio_event("hotkey_triggered", event_data)
+        # ... handle other events similarly
+
