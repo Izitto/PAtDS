@@ -19,37 +19,104 @@ class VTubeStudioAPI:
         self.send_request(payload)
 
     def get_current_loaded_model_id(self):
-        # Construct the request payload for getting the currently loaded model
-        # (Based on the documentation, you might need to send a request and parse the response)
+        payload = {
+            "apiName": "VTubeStudioPublicAPI",
+            "apiVersion": "1.0",
+            "requestID": "SomeID",
+            "messageType": "APIStateRequest"
+        }
+        response = self.send_request(payload)
+        return response.get('data', {}).get('currentModelID')
 
     def get_hotkey_list(self):
-        # Construct the request payload for getting the list of hotkeys
-        # (Similar to the above method)
+        payload = {
+            "apiName": "VTubeStudioPublicAPI",
+            "apiVersion": "1.0",
+            "requestID": "SomeID",
+            "messageType": "HotkeysRequest"
+        }
+        response = self.send_request(payload)
+        return response.get('data', {}).get('hotkeys')
 
     def trigger_hotkey(self, hotkey_id):
-        # Construct the request payload for triggering a hotkey
+        payload = {
+            "apiName": "VTubeStudioPublicAPI",
+            "apiVersion": "1.0",
+            "requestID": "SomeID",
+            "messageType": "HotkeyTriggerRequest",
+            "data": {
+                "hotkeyID": hotkey_id
+            }
+        }
+        self.send_request(payload)
 
     def get_expression_list(self):
-        # Construct the request payload for getting the list of expressions
+        payload = {
+            "apiName": "VTubeStudioPublicAPI",
+            "apiVersion": "1.0",
+            "requestID": "SomeID",
+            "messageType": "AvailableExpressionsRequest"
+        }
+        response = self.send_request(payload)
+        return response.get('data', {}).get('availableExpressions')
 
     def get_expression_state(self):
-        # Construct the request payload for getting the current expression state
+        payload = {
+            "apiName": "VTubeStudioPublicAPI",
+            "apiVersion": "1.0",
+            "requestID": "SomeID",
+            "messageType": "ExpressionStateRequest"
+        }
+        response = self.send_request(payload)
+        return response.get('data', {}).get('currentExpression')
 
     def toggle_or_set_expression(self, expression_name, state):
-        # Construct the request payload for toggling or setting an expression
+        payload = {
+            "apiName": "VTubeStudioPublicAPI",
+            "apiVersion": "1.0",
+            "requestID": "SomeID",
+            "messageType": "ExpressionToggleRequest",
+            "data": {
+                "expressionName": expression_name,
+                "expressionState": state
+            }
+        }
+        self.send_request(payload)
 
     def subscribe_to_events(self):
-        # Construct the request payload for subscribing to events
-        # Use the EventSubscriptionRequest as mentioned in the documentation
-        # You can subscribe to multiple events like ModelLoadedEvent, HotkeyTriggeredEvent, etc.
-        # When an event is triggered, use the emit_socketio_event from shared.py to send a socket event
+        payload = {
+            "apiName": "VTubeStudioPublicAPI",
+            "apiVersion": "1.0",
+            "requestID": "SomeID",
+            "messageType": "EventSubscriptionRequest",
+            "data": {
+                "events": [
+                    "ModelLoadedEvent",
+                    "HotkeyTriggeredEvent",
+                    "ExpressionChangedEvent"
+                ]
+            }
+        }
+        self.send_request(payload)
 
     def handle_event(self, event_data):
         # Parse the event_data to determine the type of event
         event_type = event_data.get("messageType")
+        
         if event_type == "ModelLoadedEvent":
-            emit_socketio_event("model_loaded", event_data)
+            model_id = event_data.get('data', {}).get('modelID')
+            emit_socketio_event("model_loaded", {"modelID": model_id})
+            
         elif event_type == "HotkeyTriggeredEvent":
-            emit_socketio_event("hotkey_triggered", event_data)
-        # ... handle other events similarly
-
+            hotkey_id = event_data.get('data', {}).get('hotkeyID')
+            emit_socketio_event("hotkey_triggered", {"hotkeyID": hotkey_id})
+            
+        elif event_type == "ExpressionChangedEvent":
+            expression_name = event_data.get('data', {}).get('expressionName')
+            expression_state = event_data.get('data', {}).get('expressionState')
+            emit_socketio_event("expression_changed", {
+                "expressionName": expression_name,
+                "expressionState": expression_state
+            })
+            
+        # You can add more event handlers as needed based on the VTube Studio API documentation
