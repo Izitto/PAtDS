@@ -1,20 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- ... (other head elements) ... -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VTube Studio Manager</title>
+    <!-- Add any additional CSS or JS links here if needed -->
 </head>
 <body>
-    <!-- ... (other body elements) ... -->
 
-    <div class="models-container">
-        {% for model in models %}
-            <button class="model-button">
-                <img src="{{ model.icon_url }}" alt="{{ model.name }}" />
-                {{ model.name }}
-            </button>
-        {% endfor %}
-    </div>
+<div class="container">
+    <h1>VTube Studio Manager</h1>
 
-    <!-- ... (other body elements) ... -->
+    {% if models %}
+        <div class="models-container">
+            {% for model in models %}
+                <button class="model-button">
+                    <img src="{{ model.icon_url }}" alt="{{ model.name }}" />
+                    {{ model.name }}
+                </button>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No models available.</p>
+    {% endif %}
+</div>
+
+<!-- Add any additional HTML content or scripts here if needed -->
+
 </body>
 </html>

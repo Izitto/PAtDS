@@ -14,7 +14,7 @@ async def search_api_server():
         s.settimeout(5)
         try:
             # Send a broadcast message
-            s.sendto(b'VTubeStudio', ('<broadcast>', 8002))
+            s.sendto(b'VTubeStudio', ('<broadcast>', 8001))
             # Receive response
             data, addr = s.recvfrom(1024)
             global BASE_URL

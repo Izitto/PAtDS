@@ -11,9 +11,11 @@ import asyncio
 
 @app.route('/vts/home')
 def vts_home():
-    loop = asyncio.get_event_loop()
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
     models = loop.run_until_complete(vtstudio.get_available_models())
     return render_template('vts_manager/home.html', models=models)
+
 
 
 
