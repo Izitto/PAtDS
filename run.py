@@ -3,6 +3,7 @@ from app import app
 import asyncio
 from modules import vtstudio
 import atexit
+import modules.vtstudio as vtstudio
 
 # Cleanup function
 def cleanup():
