@@ -4,6 +4,9 @@ import websockets
 from modules.shared import emit_socketio_event
 import os
 
+APP_NAME = "PAtDS"
+DEVELOPER_NAME = "Izitto"
+
 BASE_URL = "ws://192.168.0.101:8001"
 # BASE_URL = ""
 VTS_TOKEN_PATH = "/home/izitto/Desktop/Code/PAtDS/vts_token.txt"
@@ -34,8 +37,14 @@ async def get_available_models():
         with open(VTS_TOKEN_PATH, 'r') as f:
             token = f.read().strip()
         auth_data = {
-            "type": "AuthenticationRequest",
-            "APIAuthenticationToken": token
+            "apiName": "VTubeStudioPublicAPI",
+            "apiVersion": "1.0",
+            "messageType": "AuthenticationRequest",
+            "data": {
+                "pluginName": APP_NAME,
+                "pluginDeveloper": DEVELOPER_NAME,
+                "authenticationToken": token
+            }
         }
         await ws.send(json.dumps(auth_data))
         response = await ws.recv()
@@ -59,17 +68,29 @@ async def get_model_icons():
         with open(VTS_TOKEN_PATH, 'r') as f:
             token = f.read().strip()
         auth_data = {
-            "type": "AuthenticationRequest",
-            "APIAuthenticationToken": token
+            "apiName": "VTubeStudioPublicAPI",
+            "apiVersion": "1.0",
+            "messageType": "AuthenticationRequest",
+            "data": {
+                "pluginName": APP_NAME,
+                "pluginDeveloper": DEVELOPER_NAME,
+                "authenticationToken": token
+            }
         }
         await ws.send(json.dumps(auth_data))
         response = await ws.recv()
         response_data = json.loads(response)
         if response_data.get('authenticated'):
             # Request model icons
-            await ws.send(json.dumps({"type": "ModelIconRequest"}))
+            icon_request_data = {
+                "apiName": "VTubeStudioPublicAPI",
+                "apiVersion": "1.0",
+                "messageType": "ModelIconRequest"
+            }
+            await ws.send(json.dumps(icon_request_data))
             icons_response = await ws.recv()
             icons_data = json.loads(icons_response)
             emit_socketio_event('vtstudio_model_icons', icons_data)
         else:
             emit_socketio_event('vtstudio_error', {'message': 'Authentication failed'})
+
