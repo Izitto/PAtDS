@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ... (other head elements) ... -->
+</head>
+<body>
+    <!-- ... (other body elements) ... -->
+
+    <div class="models-container">
+        {% for model in models %}
+            <button class="model-button">
+                <img src="{{ model.icon_url }}" alt="{{ model.name }}" />
+                {{ model.name }}
+            </button>
+        {% endfor %}
+    </div>
+
+    <!-- ... (other body elements) ... -->
+</body>
+</html>
