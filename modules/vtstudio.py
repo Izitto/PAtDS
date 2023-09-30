@@ -4,8 +4,9 @@ import websockets
 from modules.shared import emit_socketio_event
 import os
 
+# BASE_URL = "ws://192.168.0.101:8001"
 BASE_URL = ""
-VTS_TOKEN_PATH = "vts_token.txt"
+VTS_TOKEN_PATH = "/home/izitto/Desktop/Code/PAtDS/vts_token.txt"
 
 async def search_api_server():
     # Create a UDP socket
