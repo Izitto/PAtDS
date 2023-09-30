@@ -27,6 +27,30 @@ class VTubeStudioAPI:
         }
         response = self.send_request(payload)
         return response.get('data', {}).get('currentModelID')
+    
+    def get_all_model_icons(self):
+        payload = {
+            "apiName": "VTubeStudioPublicAPI",
+            "apiVersion": "1.0",
+            "requestID": "SomeID",
+            "messageType": "AllModelIconRequest"
+        }
+        response = self.send_request(payload)
+        return response.get('data', {}).get('modelIcons')
+    
+
+    
+    def get_current_model_icon(self):
+        payload = {
+            "apiName": "VTubeStudioPublicAPI",
+            "apiVersion": "1.0",
+            "requestID": "SomeID",
+            "messageType": "CurrentModelIconRequest"
+        }
+        response = self.send_request(payload)
+        return response.get('data', {}).get('modelIcon')
+
+
 
     def get_hotkey_list(self):
         payload = {
