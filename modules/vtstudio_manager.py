@@ -8,7 +8,7 @@ import asyncio
 
 # pages
 import asyncio
-
+vtstudio.search_api_server()
 @app.route('/vts/home')
 def vts_home():
     loop = asyncio.new_event_loop()
