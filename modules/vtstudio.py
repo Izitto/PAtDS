@@ -1,4 +1,3 @@
-import pivts
 from modules.shared import emit_socketio_event
 
 PLUGIN_NAME = "PAtDS"
