@@ -57,4 +57,8 @@ async def start_websocket_connection():
 
 # Call the function
 
-asyncio.get_event_loop().run_until_complete(start_websocket_connection())
+def initiate_vtstudio_connection():
+    asyncio.get_event_loop().run_until_complete(start_websocket_connection())
+
+def stop_vtstudio_connection():
+    asyncio.get_event_loop().stop()
