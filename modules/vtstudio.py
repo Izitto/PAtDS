@@ -1,5 +1,5 @@
 from modules.shared import emit_socketio_event
-import socket, json, websockets, asyncio
+import socket, json, websockets, asyncio, threading
 
 
 PLUGIN_NAME = "PAtDS"
@@ -56,9 +56,11 @@ async def start_websocket_connection():
 
 
 # Call the function
-
+thread = threading.Thread(target=lambda: asyncio.get_event_loop().run_until_complete(start_websocket_connection()))
 def initiate_vtstudio_connection():
-    asyncio.get_event_loop().run_until_complete(start_websocket_connection())
+    global thread
+    thread.start()
 
 def stop_vtstudio_connection():
-    asyncio.get_event_loop().stop()
+    global thread
+    thread.join()
