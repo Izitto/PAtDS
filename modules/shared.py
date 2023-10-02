@@ -37,7 +37,7 @@ def emit_socketio_event(event, data):
 
 # request below
 def make_post_request(route, port, json_data):
-    url = f"http://192.168.1.101:{port}/{route}"
+    url = f"http://192.168.0.101:{port}/{route}"
     headers = {'Content-Type': 'application/json'}
     
     try:
@@ -49,7 +49,7 @@ def make_post_request(route, port, json_data):
         return e
 
 def make_get_request(route, port):
-    url = f"http://192.168.1.101:{port}/{route}"
+    url = f"http://192.168.0.101:{port}/{route}"
     
     try:
         response = requests.get(url)

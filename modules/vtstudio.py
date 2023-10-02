@@ -1,42 +1,60 @@
 from modules.shared import emit_socketio_event
-import nmap
-import time
-import websocket
+import socket, json, websockets, asyncio
 
 
 PLUGIN_NAME = "PAtDS"
 DEVELOPER_NAME = "Izitto"
 TOKEN_PATH = "/home/izitto/Desktop/Code/PAtDS/vts_token.txt"
-VERSION = "1.0"
+SERVER_IP = ""
+SERVER_PORT = None
 
-# New function to discover and connect to WebSocket API server
-def discover_and_connect():
-    ws_address = None
+def discover_vtube_studio_server():
+    # Create a UDP socket
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    # Bind the socket to the port
+    server_address = ('0.0.0.0', 47779)  # 0.0.0.0 means all available interfaces
+    sock.bind(server_address)
+
+    print("Waiting for VTube Studio API Server Discovery broadcast...")
+
+    try:
+        # Receive data from the socket (up to 4096 bytes)
+        data, address = sock.recvfrom(4096)
+        # Decode the received data to string and parse it as JSON
+        message = json.loads(data.decode('utf-8'))
+        # Extract the server IP and port from the message
+        global SERVER_IP, SERVER_PORT
+        SERVER_IP = address[0]
+        SERVER_PORT = message.get('data', {}).get('port', None)
+        print(f"VTube Studio API Server IP: {SERVER_IP}")
+        print(f"VTube Studio API Server Port: {SERVER_PORT}")
+    finally:
+        sock.close()
+
+async def start_websocket_connection():
+    global SERVER_IP, SERVER_PORT
     while True:
-        nm = nmap.PortScanner()
-        nm.scan(hosts='192.168.0.0/24', arguments='-p 8001')  # Adjust the IP range if needed
-        for host in nm.all_hosts():
-            if nm[host]['tcp'][8001]['state'] == 'open':
-                ws_address = f"ws://{host}:8001"
-                break
-
-        if ws_address:
+        if not SERVER_IP or not SERVER_PORT:
+            print("Discovering VTube Studio API Server...")
+            discover_vtube_studio_server()
+        
+        if SERVER_IP and SERVER_PORT:
+            uri = f"ws://{SERVER_IP}:{SERVER_PORT}"
             try:
-                ws = websocket.create_connection(ws_address)
-                # You can add any logic here after successfully connecting to the WebSocket server
-                # For now, I'm just printing the connection status
-                print(f"Connected to {ws_address}")
-                while True:
-                    # Check if the connection is still alive
-                    if not ws.connected:
-                        print("Connection lost. Rediscovering...")
-                        break
-                    time.sleep(5)
-            except websocket.WebSocketException:
-                print(f"Failed to connect to {ws_address}. Retrying...")
-        else:
-            print("WebSocket API server not found. Retrying in 5 seconds...")
-        time.sleep(5)
+                async with websockets.connect(uri) as ws:
+                    print(f"Connected to VTube Studio API Server at {uri}")
+                    # You can send or receive messages here using ws.send() and ws.recv()
+                    # For now, let's just keep the connection alive
+                    await ws.recv()
+            except websockets.ConnectionClosed:
+                print("Connection lost. Reconnecting...")
+                SERVER_IP, SERVER_PORT = "", None  # Reset IP and port to trigger rediscovery
+            except Exception as e:
+                print(f"Error: {e}")
+                await asyncio.sleep(5)  # Wait for 5 seconds before retrying
 
-# Start the discovery and connection process in a separate thread
-# threading.Thread(target=discover_and_connect, daemon=True).start()
+
+
+# Call the function
+
+asyncio.get_event_loop().run_until_complete(start_websocket_connection())
