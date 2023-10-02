@@ -31,6 +31,49 @@ def discover_vtube_studio_server():
     finally:
         sock.close()
 
+async def authenticate_with_server(ws):
+    # Check if there's an authentication token in the text file
+    try:
+        with open(TOKEN_PATH, 'r') as token_file:
+            token = token_file.read().strip()
+    except FileNotFoundError:
+        token = None
+
+    # If no token found, request one from the server
+    if not token:
+        auth_request = {
+            "apiName": "VTubeStudioPublicAPI",
+            "apiVersion": "1.0",
+            "messageType": "AuthenticationTokenRequest",
+            "data": {
+                "pluginName": PLUGIN_NAME,
+                "pluginDeveloper": DEVELOPER_NAME,
+            }
+        }
+        await ws.send(json.dumps(auth_request))
+        response = await ws.recv()
+        response_data = json.loads(response)
+        
+        # If a token is received from the server, store it in the text file
+        if response_data.get('data', {}).get('token'):
+            token = response_data['data']['token']
+            with open(TOKEN_PATH, 'w') as token_file:
+                token_file.write(token)
+
+    # Send the token to the server to authenticate the plugin connection
+    if token:
+        token_send_request = {
+            "apiName": "VTubeStudioPublicAPI",
+            "apiVersion": "1.0",
+            "messageType": "AuthenticationRequest",
+            "data": {
+                "pluginName": PLUGIN_NAME,
+                "pluginDeveloper": DEVELOPER_NAME,
+                "authenticationToken": token
+            }
+        }
+        await ws.send(json.dumps(token_send_request))
+
 async def start_websocket_connection():
     global SERVER_IP, SERVER_PORT
     while True:
@@ -43,6 +86,7 @@ async def start_websocket_connection():
             try:
                 async with websockets.connect(uri) as ws:
                     print(f"Connected to VTube Studio API Server at {uri}")
+                    await authenticate_with_server(ws)
                     # You can send or receive messages here using ws.send() and ws.recv()
                     # For now, let's just keep the connection alive
                     await ws.recv()
@@ -52,6 +96,12 @@ async def start_websocket_connection():
             except Exception as e:
                 print(f"Error: {e}")
                 await asyncio.sleep(5)  # Wait for 5 seconds before retrying
+
+
+
+
+
+
 
 
 
