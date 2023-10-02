@@ -19,9 +19,18 @@ if __name__ == '__main__':
     # Start the Control logic
     Control.start()
 
-    vtstudio.start_websocket_connection()
+    # Initiate the VTube Studio WebSocket connection and get the thread object
+    vtstudio_thread = vtstudio.initiate_vtstudio_connection()
     
     # Start the Flask app
     app.run(debug=False, port=80, host='0.0.0.0')
+
+    # Join the VTube Studio WebSocket thread
+    vtstudio_thread.join()
+
     # Join the Control logic
     Control.join()
+
+
+
+
