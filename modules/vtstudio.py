@@ -14,10 +14,10 @@ def discover_and_connect():
     ws_address = None
     while True:
         nm = nmap.PortScanner()
-        nm.scan(hosts='192.168.1.0/24', arguments='-p 8002')  # Adjust the IP range if needed
+        nm.scan(hosts='192.168.0.0/24', arguments='-p 8001')  # Adjust the IP range if needed
         for host in nm.all_hosts():
-            if nm[host]['tcp'][8002]['state'] == 'open':
-                ws_address = f"ws://{host}:8002"
+            if nm[host]['tcp'][8001]['state'] == 'open':
+                ws_address = f"ws://{host}:8001"
                 break
 
         if ws_address:
