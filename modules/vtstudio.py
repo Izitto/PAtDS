@@ -53,10 +53,13 @@ async def authenticate_with_server(ws):
         await ws.send(json.dumps(auth_request))
         response = await ws.recv()
         response_data = json.loads(response)
-        
+        print(f"Authentication response: {response_data}")
+        emit_socketio_event('vtstudio_auth_response', response_data)
         # If a token is received from the server, store it in the text file
         if response_data.get('data', {}).get('token'):
             token = response_data['data']['token']
+            print(f"Authentication token: {token}")
+            emit_socketio_event('vtstudio_auth_token', token)
             with open(TOKEN_PATH, 'w') as token_file:
                 token_file.write(token)
 
