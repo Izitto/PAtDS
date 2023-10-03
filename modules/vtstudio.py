@@ -26,8 +26,6 @@ def discover_vtube_studio_server():
         global SERVER_IP, SERVER_PORT
         SERVER_IP = address[0]
         SERVER_PORT = message.get('data', {}).get('port', None)
-        print(f"VTube Studio API Server IP: {SERVER_IP}")
-        print(f"VTube Studio API Server Port: {SERVER_PORT}")
     finally:
         sock.close()
 
@@ -53,13 +51,9 @@ async def authenticate_with_server(ws):
         await ws.send(json.dumps(auth_request))
         response = await ws.recv()
         response_data = json.loads(response)
-        print(f"Authentication response: {response_data}")
-        emit_socketio_event('vtstudio_auth_response', response_data)
         # If a token is received from the server, store it in the text file
-        if response_data.get('data', {}).get('token'):
-            token = response_data['data']['token']
-            print(f"Authentication token: {token}")
-            emit_socketio_event('vtstudio_auth_token', token)
+        if response_data.get('data', {}).get('authenticationToken'):
+            token = response_data['data']['authenticationToken']
             with open(TOKEN_PATH, 'w') as token_file:
                 token_file.write(token)
 
@@ -81,11 +75,12 @@ async def start_websocket_connection():
     global SERVER_IP, SERVER_PORT
     while True:
         if not SERVER_IP or not SERVER_PORT:
-            print("Discovering VTube Studio API Server...")
+            emit_socketio_event("vts_debug", "Discovering VTube Studio API Server...")
             discover_vtube_studio_server()
         
         if SERVER_IP and SERVER_PORT:
             uri = f"ws://{SERVER_IP}:{SERVER_PORT}"
+            emit_socketio_event("vts_debug", f"Connecting to VTube Studio API Server at {uri}...")
             try:
                 async with websockets.connect(uri) as ws:
                     print(f"Connected to VTube Studio API Server at {uri}")
