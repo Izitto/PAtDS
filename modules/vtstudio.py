@@ -7,6 +7,7 @@ DEVELOPER_NAME = "Izitto"
 TOKEN_PATH = "/home/izitto/Desktop/Code/PAtDS/vts_token.txt"
 SERVER_IP = ""
 SERVER_PORT = None
+VTS_MODELS = []
 
 def discover_vtube_studio_server():
     # Create a UDP socket
@@ -71,6 +72,25 @@ async def authenticate_with_server(ws):
         }
         await ws.send(json.dumps(token_send_request))
 
+async def fetch_vts_models(ws):
+    model_request = {
+        "apiName": "VTubeStudioPublicAPI",
+        "apiVersion": "1.0",
+        "messageType": "AvailableModelsRequest"
+    }
+    await ws.send(json.dumps(model_request))
+    response = await ws.recv()
+    response_data = json.loads(response)
+    emit_socketio_event("vts_debug", response)
+
+    # Extract model names and IDs and store them in the global VTS_MODELS array
+    global VTS_MODELS
+    VTS_MODELS = [{"name": model["modelName"], "id": model["modelID"]} for model in response_data.get('data', {}).get('availableModels', [])]
+    
+
+
+
+
 async def start_websocket_connection():
     global SERVER_IP, SERVER_PORT
     while True:
@@ -80,13 +100,15 @@ async def start_websocket_connection():
         
         if SERVER_IP and SERVER_PORT:
             uri = f"ws://{SERVER_IP}:{SERVER_PORT}"
-            emit_socketio_event("vts_debug", f"Connecting to VTube Studio API Server at {uri}...")
+            # emit_socketio_event("vts_debug", f"Connecting to VTube Studio API Server at {uri}...")
             try:
                 async with websockets.connect(uri) as ws:
                     print(f"Connected to VTube Studio API Server at {uri}")
                     await authenticate_with_server(ws)
                     # You can send or receive messages here using ws.send() and ws.recv()
                     # For now, let's just keep the connection alive
+
+                    await fetch_vts_models(ws)
                     await ws.recv()
             except websockets.ConnectionClosed:
                 print("Connection lost. Reconnecting...")
