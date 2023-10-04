@@ -8,7 +8,8 @@ import modules.vtstudio as vtstudio
 # Cleanup function
 def cleanup():
     # Add any cleanup logic here
-    vtstudio.stop_vtstudio_connection()
+    # vtstudio.stop_vtstudio_connection()
+    pass
 
 # Register the cleanup function to be called on exit
 atexit.register(cleanup)
