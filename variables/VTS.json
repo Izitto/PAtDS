@@ -1,0 +1,22 @@
+{
+    "connected": "False",
+    "authorized": "False",
+    "models": [
+        {
+            "name": "",
+            "id": "",
+            "active": "False"
+        }
+    ],
+    "expressions": [
+        {
+            "FileName": "",
+            "Name": "",
+            "active": "False"
+        }
+    ],
+    "req_model": "",
+    "req_expression": "",
+    "req_hotkey": ""
+
+}

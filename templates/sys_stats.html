@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>System Stats</title>
+    <style>
+        body {
+            background-color: #313131;
+            color: #fff;
+            font-family: sans-serif;
+            text-align: center;
+            
+        }
+    </style>
+</head>
+<body>
+    <!--show stats from flask for cpu, mem and disk usage, cpu temp and uptime-->
+    <h1>System Stats</h1>
+    <p>CPU Usage: {{ cpu_usage }}%</p>
+    <p>Memory Usage: {{ mem_usage }}%</p>
+    <p>Disk Usage: {{ disk_usage }}%</p>
+    <p>CPU Temp: {{ cpu_temp }}°C</p>
+    <p>Uptime: {{ uptime }}</p>
+
+    <script>
+        // Refresh stats every 5 seconds
+        setInterval(function() {
+            location.reload();
+        }, 2000);
+
+        // Get stats from Flask and update page
+        fetch('/stats')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('cpu_usage').textContent = data.cpu_usage;
+                document.getElementById('mem_usage').textContent = data.mem_usage;
+                document.getElementById('disk_usage').textContent = data.disk_usage;
+                document.getElementById('cpu_temp').textContent = data.cpu_temp;
+                document.getElementById('uptime').textContent = data.uptime;
+            });
+    </script>
+</body>
+</html>

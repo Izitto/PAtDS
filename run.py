@@ -1,9 +1,8 @@
-import modules.Control as Control, modules.vtstudio as vtstudio
+import modules.Control as Control
 from app import app
 import asyncio, threading
-from modules import vtstudio
 import atexit
-import modules.vtstudio as vtstudio
+import modules.VTS.vtstudio as vtstudio
 
 # Cleanup function
 def cleanup():

@@ -1,6 +1,7 @@
 from modules.shared import emit_socketio_event
 import socket, json, websockets, asyncio, threading
-
+import modules.shared as shared
+import queue
 
 PLUGIN_NAME = "PAtDS"
 DEVELOPER_NAME = "Izitto"
@@ -8,7 +9,14 @@ TOKEN_PATH = "/home/izitto/Desktop/Code/PAtDS/vts_token.txt"
 SERVER_IP = ""
 SERVER_PORT = None
 VTS_MODELS = []
+VTS_EXPRESSIONS = []
 IS_CONNECTED = False
+IS_AUTH = False
+ws = websockets
+# function variables
+req_model_id = None
+req_expression = None
+req_hotkeyID = None
 
 def discover_vtube_studio_server():
     # Create a UDP socket
@@ -28,6 +36,7 @@ def discover_vtube_studio_server():
         global SERVER_IP, SERVER_PORT
         SERVER_IP = address[0]
         SERVER_PORT = message.get('data', {}).get('port', None)
+        emit_socketio_event("vts_debug", f"VTube Studio API Server discovered at {SERVER_IP}:{SERVER_PORT}")
     finally:
         sock.close()
 
@@ -41,7 +50,7 @@ async def authenticate_with_server(ws):
 
     # If no token found, request one from the server
     if not token:
-        auth_request = {
+        header = {
             "apiName": "VTubeStudioPublicAPI",
             "apiVersion": "1.0",
             "messageType": "AuthenticationTokenRequest",
@@ -50,7 +59,7 @@ async def authenticate_with_server(ws):
                 "pluginDeveloper": DEVELOPER_NAME,
             }
         }
-        await ws.send(json.dumps(auth_request))
+        await ws.send(json.dumps(header))
         response = await ws.recv()
         response_data = json.loads(response)
         # If a token is received from the server, store it in the text file
@@ -62,7 +71,7 @@ async def authenticate_with_server(ws):
         
     # Send the token to the server to authenticate the plugin connection
     if token:
-        token_send_request = {
+        header = {
             "apiName": "VTubeStudioPublicAPI",
             "apiVersion": "1.0",
             "messageType": "AuthenticationRequest",
@@ -72,7 +81,7 @@ async def authenticate_with_server(ws):
                 "authenticationToken": token
             }
         }
-        await ws.send(json.dumps(token_send_request))
+        await ws.send(json.dumps(header))
     response = await ws.recv()
     response_data = json.loads(response)
     if response_data.get('data', {}).get('currentSessionAuthenticated') == "true":
@@ -82,29 +91,81 @@ async def authenticate_with_server(ws):
 
 
 async def fetch_vts_models(ws):
-    model_request = {
+    header = {
         "apiName": "VTubeStudioPublicAPI",
         "apiVersion": "1.0",
         "messageType": "AvailableModelsRequest"
     }
-    await ws.send(json.dumps(model_request))
+    await ws.send(json.dumps(header))
     response = await ws.recv()
     response_data = json.loads(response)
-    emit_socketio_event("vts_debug", response)
-
     # Extract model names and IDs and store them in the global VTS_MODELS array
-    global VTS_MODELS
-    VTS_MODELS = [{"name": model["modelName"], "id": model["modelID"]} for model in response_data.get('data', {}).get('availableModels', [])]
-    
+    # global VTS_MODELS
+    return [{"name": model["modelName"], "id": model["modelID"], "active": model["modelLoaded"]} for model in response_data.get('data', {}).get('availableModels', [])]
 
+async def fetch_vts_expressions(ws):
+    header = {
+        "apiName": "VTubeStudioPublicAPI",
+        "apiVersion": "1.0",
+        "requestID": "SomeID",
+        "messageType": "ExpressionStateRequest",
+        "data": {
+            "details": True,
+            "expressionFile": "myExpression_optional_1.exp3.json",
+        }
+    }
+    await ws.send(json.dumps(header))
+    response = await ws.recv()
+    response_data = json.loads(response)
+    # Extract extract name, file and active status and store them in the global VTS_EXPRESSIONS array
+    # global VTS_EXPRESSIONS
+    return [{"name": expression["name"], "file": expression["file"], "active": expression["active"]} for expression in response_data.get('data', {}).get('expressionState', [])]
+
+
+async def loadModel(ws):
+    global req_model_id
+    header = {
+        "apiName": "VTubeStudioPublicAPI",
+        "apiVersion": "1.0",
+        "messageType": "ModelLoadRequest",
+        "data": {
+            "modelID": req_model_id
+        }
+    }
+    if req_model_id != None:
+        await ws.send(json.dumps(header))
+        response = await ws.recv()
+        response_data = json.loads(response)
+        emit_socketio_event("vts_debug", response_data)
+        req_model_id = None
+
+async def setExpression(ws):
+    global req_expression
+    header = {
+        "apiName": "VTubeStudioPublicAPI",
+        "apiVersion": "1.0",
+        "messageType": "SetExpressionRequest",
+        "data": {
+            "expressionFile": req_expression['file'],
+            "active": req_expression['status']
+        }
+    }
+    if req_expression != None:
+        await ws.send(json.dumps(header))
+        response = await ws.recv()
+        response_data = json.loads(response)
+        emit_socketio_event("vts_debug", response_data)
+        req_expression = []
 
 
 
 async def start_websocket_connection():
-    global SERVER_IP, SERVER_PORT
-    authenticated = False
+    global SERVER_IP, SERVER_PORT, IS_AUTH, IS_CONNECTED, VTS_MODELS, VTS_EXPRESSIONS
     models_fetched = False
+    expressions_fetched = False
+    
     while True:
+        
         if not SERVER_IP or not SERVER_PORT:
             emit_socketio_event("vts_debug", "Discovering VTube Studio API Server...")
             discover_vtube_studio_server()
@@ -113,25 +174,39 @@ async def start_websocket_connection():
             uri = f"ws://{SERVER_IP}:{SERVER_PORT}"
             # emit_socketio_event("vts_debug", f"Connecting to VTube Studio API Server at {uri}...")
             try:
+                emit_socketio_event("vts_debug", f"Connecting to VTube Studio API Server at {uri}...")
                 async with websockets.connect(uri) as ws:
-                    print(f"Connected to VTube Studio API Server at {uri}")
-                    if authenticated == False:
-                        authenticated = await authenticate_with_server(ws)
+                    IS_CONNECTED = True
+                    emit_socketio_event("vts_debug", "Connected!")
+                    if IS_AUTH == False:
+                        IS_AUTH = await authenticate_with_server(ws)
 
                     # You can send or receive messages here using ws.send() and ws.recv()
                     # For now, let's just keep the connection alive
+                    await loadModel(ws)
+                    await setExpression(ws)
+                    
+                    if expressions_fetched == False:
+                        VTS_EXPRESSIONS = await fetch_vts_expressions(ws)
+                        expressions_fetched = True
+                    
                     if models_fetched == False:
-                        await fetch_vts_models(ws)
+                        VTS_MODELS = await fetch_vts_models(ws)
                         models_fetched = True
-                    await ws.recv()
+                    response = await ws.recv()
+                    emit_socketio_event("vts_debug", response)
+            
             except websockets.ConnectionClosed:
-                print("Connection lost. Reconnecting...")
+                emit_socketio_event("vts_debug", "Connection closed")
+                IS_AUTH = False
+                IS_CONNECTED = False
                 SERVER_IP, SERVER_PORT = "", None  # Reset IP and port to trigger rediscovery
             except Exception as e:
-                print(f"Error: {e}")
+                emit_socketio_event("vts_debug", f"Error: {e} {type(e)} {e.args} {e.__traceback__.tb_lineno}")
+                IS_AUTH = False
+                IS_CONNECTED = False
                 await asyncio.sleep(5)  # Wait for 5 seconds before retrying
-
-
+                
 
 # Call the function
 def initiate_vtstudio_connection():
@@ -141,5 +216,18 @@ def initiate_vtstudio_connection():
         loop.run_until_complete(start_websocket_connection())
 
     thread = threading.Thread(target=run)
+    thread.daemon = True
     thread.start()
     return thread
+
+
+
+# requests
+def model_request(model_id):
+    global req_model_id
+    req_model_id = model_id
+
+
+def expression_request(file, active):
+    global req_expression
+    req_expression = [file, active]

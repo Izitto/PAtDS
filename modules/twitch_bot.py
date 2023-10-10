@@ -1,4 +1,4 @@
-from twitchio.ext import commands
+'''from twitchio.ext import commands
 
 
 class Bot(commands.Bot):
@@ -53,4 +53,4 @@ class Bot(commands.Bot):
 
 
 bot = Bot()
-bot.run()
+bot.run()'''

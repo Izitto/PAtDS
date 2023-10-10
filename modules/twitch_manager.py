@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, render_template, redirect, url_for, flash
+'''from flask import Flask, jsonify, request, render_template, redirect, url_for, flash
 import requests
 import json
 import os
@@ -18,3 +18,4 @@ def twitch_home():
 @app.route('/twitch/redeems')
 def twitch_redeems():
     return render_template('twitch_manager/redeems.html')
+'''

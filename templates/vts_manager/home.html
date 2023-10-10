@@ -14,7 +14,7 @@
     {% if models %}
         <div class="models-container">
             {% for model in models %}
-                <button class="model-button">
+                <button class="model-button" modelId="{{model.id}}">
                     <img src="{{ model.icon_url }}" alt="{{ model.name }}" />
                     {{ model.name }}
                 </button>
@@ -26,6 +26,33 @@
 </div>
 
 <!-- Add any additional HTML content or scripts here if needed -->
+<script>
+    // pass the model id to post vts/api/loadModel when a model button is clicked
+    const modelButtons = document.querySelectorAll('.model-button');
+    modelButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const Model_ID = button.getAttribute('modelId');
+            fetch('/vts/api/loadModel', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ Model_ID })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log('Model loaded successfully');
+                } else {
+                    console.log('Model failed to load, error: ' + data.error);
+                }
+            })
+            .catch(error => {
+                // do something
+            });
+        });
+    });
 
+</script>
 </body>
 </html>
