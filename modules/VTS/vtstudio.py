@@ -8,9 +8,9 @@ from modules.VTS.API_requests import fetch_vts_models, fetch_vts_expressions
 
 # function variables
 async def setup():
-    send.put_nowait(await authenticate_with_server(ws))
-    send.put_nowait(await fetch_vts_models(ws))
-    send.put_nowait(await fetch_vts_expressions(ws))
+    send.put_nowait(authenticate_with_server(ws))
+    send.put_nowait(fetch_vts_models(ws))
+    send.put_nowait(fetch_vts_expressions(ws))
 
 
 
@@ -37,9 +37,10 @@ async def start_websocket_connection(send):
                     #     # IS_AUTH = await authenticate_with_server(ws)
                     #     await setAuth(await authenticate_with_server(ws))
                     #     emit_socketio_event("vts_debug", "Connected to VTube Studio API Server")
-                    # 
-                    await send.get_nowait()
-                    
+                    #
+                    while not send.empty():
+                        func_to_call = send.get_nowait()
+                        await func_to_call(ws)
                     
             
             except websockets.ConnectionClosed:
