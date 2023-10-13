@@ -5,7 +5,6 @@ from modules.VTS.API_requests import authenticate_with_server, VTS_MODELS, VTS_E
 from modules.VTS.API_requests import fetch_vts_models, fetch_vts_expressions
 # receive = queue.Queue()
 
-# ws = websockets
 
 # function variables
 async def setup():
