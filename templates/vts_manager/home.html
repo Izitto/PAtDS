@@ -13,9 +13,9 @@
 
     {% if models %}
         <div class="models-container">
+            <h2>Models</h2>
             {% for model in models %}
                 <button class="model-button" modelId="{{model.id}}">
-                    <img src="{{ model.icon_url }}" alt="{{ model.name }}" />
                     {{ model.name }}
                 </button>
             {% endfor %}
@@ -23,6 +23,19 @@
     {% else %}
         <p>No models available.</p>
     {% endif %}
+    {% if expressions %}
+        <div class="expressions-container">
+            <h2>Expressions</h2>
+            {% for expression in expressions %}
+                <button class="expression-button" expressionId="{{expression.id}}">
+                    {{ expression.name }}
+                </button>
+            {% endfor %}
+        </div>
+    {% else %}
+    <p>No expressions available</p>
+    {% endif %}
+    
 </div>
 
 <!-- Add any additional HTML content or scripts here if needed -->
@@ -32,12 +45,17 @@
     modelButtons.forEach(button => {
         button.addEventListener('click', () => {
             const Model_ID = button.getAttribute('modelId');
+            
+            // Create form data
+            const formData = new URLSearchParams();
+            formData.append('Model_ID', Model_ID);
+
             fetch('/vts/api/loadModel', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/x-www-form-urlencoded'
                 },
-                body: JSON.stringify({ Model_ID })
+                body: formData
             })
             .then(response => response.json())
             .then(data => {
@@ -52,6 +70,7 @@
             });
         });
     });
+
 
 </script>
 </body>
