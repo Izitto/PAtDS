@@ -57,7 +57,7 @@ async def authenticate_with_server(ws):
                 "authenticationToken": token
             }
         }
-        await ws.send(json.dumps(header))
+    await ws.send(json.dumps(header))
     response = await ws.recv()
     response_data = json.loads(response)
     '''if response_data.get('data', {}).get('currentSessionAuthenticated') == "true":

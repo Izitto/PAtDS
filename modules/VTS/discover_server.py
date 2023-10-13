@@ -4,6 +4,7 @@ SERVER_IP = ""
 SERVER_PORT = None
 
 def discover_vtube_studio_server():
+    global SERVER_IP, SERVER_PORT
     # Create a UDP socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     # Bind the socket to the port
@@ -11,7 +12,7 @@ def discover_vtube_studio_server():
     sock.bind(server_address)
 
     print("Waiting for VTube Studio API Server Discovery broadcast...")
-    global SERVER_IP, SERVER_PORT
+    
     try:
         # Receive data from the socket (up to 4096 bytes)
         data, address = sock.recvfrom(4096)

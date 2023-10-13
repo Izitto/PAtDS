@@ -10,8 +10,8 @@ from modules.shared import emit_socketio_event
 # pages
 import asyncio
 @app.route('/vts/home')
-def vts_home():
-    models = vtstudio.VTS_MODELS.getModels()
+async def vts_home():
+    models = vtstudio.authenticate_with_server(vtstudio.ws)
     # expressions = vtstudio.VTS_EXPRESSIONS
 
     return render_template('vts_manager/home.html', models=models)
