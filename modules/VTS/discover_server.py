@@ -11,16 +11,18 @@ def discover_vtube_studio_server():
     sock.bind(server_address)
 
     print("Waiting for VTube Studio API Server Discovery broadcast...")
-
+    global SERVER_IP, SERVER_PORT
     try:
         # Receive data from the socket (up to 4096 bytes)
         data, address = sock.recvfrom(4096)
         # Decode the received data to string and parse it as JSON
         message = json.loads(data.decode('utf-8'))
         # Extract the server IP and port from the message
-        global SERVER_IP, SERVER_PORT
+        
         SERVER_IP = address[0]
         SERVER_PORT = message.get('data', {}).get('port', None)
         emit_socketio_event("vts_debug", f"VTube Studio API Server discovered at {SERVER_IP}:{SERVER_PORT}")
     finally:
         sock.close()
+    
+    return SERVER_IP, SERVER_PORT

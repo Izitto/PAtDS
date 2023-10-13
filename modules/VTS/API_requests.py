@@ -60,10 +60,10 @@ async def authenticate_with_server(ws):
         await ws.send(json.dumps(header))
     response = await ws.recv()
     response_data = json.loads(response)
-    if response_data.get('data', {}).get('currentSessionAuthenticated') == "true":
-        IS_AUTH = True
+    '''if response_data.get('data', {}).get('currentSessionAuthenticated') == "true":
+        return True
     else:
-        IS_AUTH = False
+        return False'''
 
 
 async def fetch_vts_models(ws):
@@ -130,5 +130,4 @@ async def setExpression(ws):
         response_data = json.loads(response)
         emit_socketio_event("vts_debug", response_data)
         req_expression = { "file": None, "status": None}
-
 
