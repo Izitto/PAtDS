@@ -9,9 +9,9 @@ from modules.VTS.API_requests import fetch_vts_models, fetch_vts_expressions
 
 # function variables
 async def setup():
-    send.put_nowait(await authenticate_with_server)
-    send.put_nowait(await fetch_vts_models)
-    send.put_nowait(await fetch_vts_expressions)
+    send.put_nowait(await authenticate_with_server(ws))
+    send.put_nowait(await fetch_vts_models(ws))
+    send.put_nowait(await fetch_vts_expressions(ws))
 
 
 
