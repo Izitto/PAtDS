@@ -44,7 +44,7 @@ async def authenticate_with_server(ws):
             with open(TOKEN_PATH, 'w') as token_file:
                 token_file.write(token)
 
-        
+    global IS_AUTH
     # Send the token to the server to authenticate the plugin connection
     if token:
         header = {
@@ -61,9 +61,9 @@ async def authenticate_with_server(ws):
     response = await ws.recv()
     response_data = json.loads(response)
     if response_data.get('data', {}).get('currentSessionAuthenticated') == "true":
-        return True
+        IS_AUTH = True
     else:
-        return False
+        IS_AUTH = False
 
 
 async def fetch_vts_models(ws):
@@ -76,7 +76,7 @@ async def fetch_vts_models(ws):
     response = await ws.recv()
     response_data = json.loads(response)
     # Extract model names and IDs and store them in the global VTS_MODELS array
-    return [Model(model["modelName"], model["modelID"], model["modelLoaded"]) for model in response_data.get('data', {}).get('availableModels', [])]
+    Models.addModels([Model(model["modelName"], model["modelID"], model["modelLoaded"]) for model in response_data.get('data', {}).get('availableModels', [])])
 
 async def fetch_vts_expressions(ws):
     header = {
@@ -93,7 +93,7 @@ async def fetch_vts_expressions(ws):
     response = await ws.recv()
     response_data = json.loads(response)
     # Extract extract name, file and active status and store them in the global VTS_EXPRESSIONS array
-    return [Expression(expression["name"], expression["file"], expression["active"]) for expression in response_data.get('data', {}).get('expressionState', [])]
+    Expressions.addExpression([Expression(expression["name"], expression["file"], expression["active"]) for expression in response_data.get('data', {}).get('expressionState', [])])
 
 
 async def loadModel(ws):

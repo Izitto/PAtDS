@@ -25,4 +25,7 @@ class Expressions:
     def getExpressions(self):
         return self.expressions
     
+    def addExpressions(self, expressions):
+        for expression in expressions:
+            self.addExpression(expression)
     

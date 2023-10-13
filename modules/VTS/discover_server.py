@@ -3,7 +3,6 @@ from modules.shared import emit_socketio_event
 SERVER_IP = ""
 SERVER_PORT = None
 
-
 def discover_vtube_studio_server():
     # Create a UDP socket
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
