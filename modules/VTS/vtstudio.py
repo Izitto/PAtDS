@@ -42,7 +42,12 @@ async def start_websocket_connection(send):
                             emit_socketio_event("vts_debug", f"Calling {func_to_call}")
                             await func_to_call(ws)
                     
-            
+            except websockets.InvalidStatusCode as e:
+                emit_socketio_event("vts_debug", f"Error: {e} {type(e)} {e.args} {e.__context__}")
+                IS_AUTH = False
+                IS_CONNECTED = False
+                setup()
+                SERVER_IP, SERVER_PORT = "", None
             except websockets.ConnectionClosed:
                 emit_socketio_event("vts_debug", "Connection closed")
                 IS_AUTH = False

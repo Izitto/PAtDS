@@ -60,7 +60,7 @@ async def authenticate_with_server(ws):
     await ws.send(json.dumps(header))
     response = await ws.recv()
     response_data = json.loads(response)
-    if response_data.get('data', {}).get('currentSessionAuthenticated') == "true":
+    if response_data.get('data', {}).get('authenticated') is True:
         emit_socketio_event("vts_debug", "Authenticated with VTube Studio")
     else:
         emit_socketio_event("vts_debug", "Authentication with VTube Studio failed")

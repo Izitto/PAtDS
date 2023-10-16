@@ -23,6 +23,8 @@ def discover_vtube_studio_server():
         SERVER_IP = address[0]
         SERVER_PORT = message.get('data', {}).get('port', None)
         emit_socketio_event("vts_debug", f"VTube Studio API Server discovered at {SERVER_IP}:{SERVER_PORT}")
+    except Exception as e:
+        emit_socketio_event("vts_debug", f"Error: {e} {type(e)} {e.args} {e.__context__}")
     finally:
         sock.close()
     
