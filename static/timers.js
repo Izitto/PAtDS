@@ -3,8 +3,8 @@ $(document).ready(function() {
     keepAlive();
 });
 
-var neko_timer = getCookie('neko_timer') || 0;
-var derp_timer = getCookie('derp_timer') || 0;
+var neko_timer = parseInt(getCookie('neko_timer')) || 0;
+var derp_timer = parseInt(getCookie('derp_timer')) || 0;
 var derpSound = new Audio('/api/audio/derp.mp3');
 var nekoSound = new Audio('/api/audio/nya.mp3');
 var poofSound = new Audio('/api/audio/poof.mp3');

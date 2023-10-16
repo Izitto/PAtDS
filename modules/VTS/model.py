@@ -43,3 +43,6 @@ class Models:
                 return model.id
         return None
     
+    def toStr(self):
+        return str(self.models)
+    

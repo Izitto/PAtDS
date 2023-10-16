@@ -28,4 +28,7 @@ class Expressions:
     def addExpressions(self, expressions):
         for expression in expressions:
             self.addExpression(expression)
+
+    def toStr(self):
+        return str(self.expressions)
     

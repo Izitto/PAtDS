@@ -11,7 +11,7 @@ from modules.shared import emit_socketio_event
 import asyncio
 @app.route('/vts/home')
 async def vts_home():
-    models = vtstudio.authenticate_with_server(vtstudio.ws)
+    models = API_requests.VTS_MODELS.getModels()
     # expressions = vtstudio.VTS_EXPRESSIONS
 
     return render_template('vts_manager/home.html', models=models)
@@ -20,9 +20,11 @@ async def vts_home():
 def loadModel():
     print("loadModel() called")
     Model_ID = request.form['Model_ID']
+    vtstudio.sender(API_requests.loadModel, Model_ID)
     # vtstudio.model_request(Model_ID)
     emit_socketio_event("vts_debug", "model request: " + Model_ID)
-    API_requests.send.put_nowait(Model_ID)
+    # API_requests.send.put_nowait(Model_ID)
+
     return jsonify({'success': True})
 '''
 @app.route('/vts/api/setExpression', methods=['POST'])
