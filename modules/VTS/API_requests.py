@@ -92,8 +92,7 @@ async def fetch_vts_expressions(ws):
         "requestID": "SomeID",
         "messageType": "ExpressionStateRequest",
         "data": {
-            "details": True,
-            "expressionFile": "myExpression_optional_1.exp3.json",
+            "details": True
         }
     }
     try:
@@ -103,8 +102,9 @@ async def fetch_vts_expressions(ws):
         # Extract extract name, file and active status and store them in the global VTS_EXPRESSIONS array
         # Expressions.addExpression([Expression(expression["name"], expression["file"], expression["active"]) for expression in response_data.get('data', {}).get('expressionState', [])])
         # add expressions
-        VTS_EXPRESSIONS.addExpressions([Expression(expression["name"], expression["file"], expression["active"]) for expression in response_data.get('data', {}).get('expressionState', [])])
+        VTS_EXPRESSIONS.addExpressions([Expression(expression["name"], expression["file"], expression["active"]) for expression in response_data.get('data', {}).get('expressions', [])])
         emit_socketio_event("vts_debug", VTS_EXPRESSIONS.toStr())
+        emit_socketio_event("vts_debug", response_data)
     except Exception as e:
         emit_socketio_event("vts_debug", f"Error: {e} {type(e)} {e.args} {e.__traceback__.tb_lineno}")
 
@@ -140,6 +140,19 @@ async def setExpression(ws, expression):
     response_data = json.loads(response)
     emit_socketio_event("vts_debug", response_data)
     # expression = { "file": None, "status": None}
+
+async def dummy(ws):
+    header = {
+	"apiName": "VTubeStudioPublicAPI",
+	"apiVersion": "1.0",
+	"requestID": "MyIDWithLessThan64Characters",
+	"messageType": "APIStateRequest"
+    }
+    await ws.send(json.dumps(header))
+    response = await ws.recv()
+    response_data = json.loads(response)
+    # emit_socketio_event("vts_debug", response_data)
+
 
 def getModels():
     return VTS_MODELS

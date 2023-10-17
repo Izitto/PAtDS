@@ -12,9 +12,9 @@ import asyncio
 @app.route('/vts/home')
 async def vts_home():
     models = API_requests.VTS_MODELS.getModels()
-    # expressions = vtstudio.VTS_EXPRESSIONS
+    expressions = vtstudio.VTS_EXPRESSIONS.getExpressions()
 
-    return render_template('vts_manager/home.html', models=models)
+    return render_template('vts_manager/home.html', models=models, expressions=expressions)
 
 @app.route('/vts/api/loadModel', methods=['POST'])
 def loadModel():
@@ -26,15 +26,16 @@ def loadModel():
     # API_requests.send.put_nowait(Model_ID)
 
     return jsonify({'success': True})
-'''
+
 @app.route('/vts/api/setExpression', methods=['POST'])
 def setExpression():
     print("setExpression() called")
     file = request.form['file']
     active = request.form['active']
-    API_requests.req_expression = {"file": file, "status": active}
+    # API_requests.req_expression = {"file": file, "status": active}
+    vtstudio.sender(API_requests.setExpression, {"file": file, "status": active})
     return jsonify({'success': True})
 
-'''
+
 # API ENDPOINTS /vts/api/...
 

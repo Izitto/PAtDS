@@ -3,21 +3,23 @@ import websockets, asyncio, threading, queue
 from modules.VTS.discover_server import discover_vtube_studio_server, SERVER_IP, SERVER_PORT
 from modules.VTS.API_requests import VTS_MODELS, VTS_EXPRESSIONS, send, IS_CONNECTED, IS_AUTH
 import modules.VTS.API_requests as API_requests
-# receive = queue.Queue()
+import modules.VTS.API_events as API_events
 
 
 # function variables
 # queue setup { type, function, args}
 def setup():
-    arg = None
-    send.put_nowait([ API_requests.authenticate_with_server, arg])
-    send.put_nowait([ API_requests.fetch_vts_models, arg])
-    send.put_nowait([ API_requests.fetch_vts_expressions, arg])
+    sender(API_requests.authenticate_with_server, None)
+    sender(API_requests.fetch_vts_models, None)
+    sender(API_requests.fetch_vts_expressions, None)
+    sender(API_events.emit_socketio_event, None)
+
+    
 
 def sender(function, args):
     send.put_nowait([ function, args ])
 
-async def start_websocket_connection(send):
+async def start_websocket_connection(send: queue.Queue):
     setup()
     global VTS_EXPRESSIONS, IS_CONNECTED, IS_AUTH
     SERVER_IP, SERVER_PORT = "", None
@@ -32,15 +34,18 @@ async def start_websocket_connection(send):
             uri = f"ws://{SERVER_IP}:{SERVER_PORT}"
             try:
                 async with websockets.connect(uri) as ws:
-                    while not send.empty():
-                        list = send.get_nowait()
-                        func_to_call, arg = list[0], list[1]
-                        if arg is not None:
-                            emit_socketio_event("vts_debug", f"Calling {func_to_call} with arg {arg}")
-                            await func_to_call(ws, arg)
-                        else:
-                            emit_socketio_event("vts_debug", f"Calling {func_to_call}")
-                            await func_to_call(ws)
+                    while True:  # Infinite loop to keep the connection alive
+                        if not send.empty():
+                            list = send.get_nowait()
+                            func_to_call, arg = list[0], list[1]
+                            if arg is not None:
+                                await func_to_call(ws, arg)
+                            else:
+                                await func_to_call(ws)
+                        if ws.closed:
+                            break
+                    
+                    
                     
             except websockets.InvalidStatusCode as e:
                 emit_socketio_event("vts_debug", f"Error: {e} {type(e)} {e.args} {e.__context__}")
