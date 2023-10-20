@@ -17,11 +17,10 @@ async def vts_home():
     return render_template('vts_manager/home.html', models=models, expressions=expressions)
 
 @app.route('/vts/api/loadModel', methods=['POST'])
-def loadModel():
+async def loadModel():
     print("loadModel() called")
     Model_ID = request.form['Model_ID']
-    vtstudio.sender(API_requests.loadModel, Model_ID)
-    # vtstudio.model_request(Model_ID)
+    await vtstudio.sender(API_requests.loadModel, Model_ID)
     emit_socketio_event("vts_debug", "model request: " + Model_ID)
     # API_requests.send.put_nowait(Model_ID)
 

@@ -1,6 +1,5 @@
 import json, queue
-from modules.VTS.model import Model, Models
-from modules.VTS.expression import Expression, Expressions
+from modules.VTS.objects import VTS_MODELS, VTS_EXPRESSIONS, Model, Expression
 from modules.shared import emit_socketio_event
 req_model_id = None
 req_expression = { "file": None, "status": None}
@@ -10,11 +9,11 @@ expressions_fetched = False
 PLUGIN_NAME = "PAtDS"
 DEVELOPER_NAME = "Izitto"
 TOKEN_PATH = "/home/izitto/Desktop/Code/PAtDS/vts_token.txt"
-VTS_MODELS = Models()
-VTS_EXPRESSIONS = Expressions()
 send = queue.Queue()
 IS_CONNECTED = False
 IS_AUTH = False
+
+
 
 async def authenticate_with_server(ws):
     # Check if there's an authentication token in the text file
@@ -80,7 +79,7 @@ async def fetch_vts_models(ws):
         # Extract model names and IDs and store them in the global VTS_MODELS array
         # add models
         VTS_MODELS.addModels([Model(model["modelName"], model["modelID"], model["modelLoaded"]) for model in response_data.get('data', {}).get('availableModels', [])])
-        emit_socketio_event("vts_debug", VTS_MODELS.toStr())
+        # emit_socketio_event("vts_debug", VTS_MODELS.toStr())
     except Exception as e:
         emit_socketio_event("vts_debug", f"Error: {e} {type(e)} {e.args} {e.__traceback__.tb_lineno}")
 
@@ -103,13 +102,14 @@ async def fetch_vts_expressions(ws):
         # Expressions.addExpression([Expression(expression["name"], expression["file"], expression["active"]) for expression in response_data.get('data', {}).get('expressionState', [])])
         # add expressions
         VTS_EXPRESSIONS.addExpressions([Expression(expression["name"], expression["file"], expression["active"]) for expression in response_data.get('data', {}).get('expressions', [])])
-        emit_socketio_event("vts_debug", VTS_EXPRESSIONS.toStr())
-        emit_socketio_event("vts_debug", response_data)
+        # emit_socketio_event("vts_debug", VTS_EXPRESSIONS.toStr())
+        # emit_socketio_event("vts_debug", response_data)
     except Exception as e:
         emit_socketio_event("vts_debug", f"Error: {e} {type(e)} {e.args} {e.__traceback__.tb_lineno}")
 
 async def loadModel(ws, model_id):
     # global req_model_id
+    emit_socketio_event("vts_debug", "model requested: " + model_id)
     header = {
         "apiName": "VTubeStudioPublicAPI",
         "apiVersion": "1.0",
