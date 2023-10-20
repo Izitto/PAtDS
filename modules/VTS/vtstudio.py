@@ -1,11 +1,13 @@
-from modules.shared import emit_socketio_event
+from modules.shared import emit_socketio_event, report_error
 import websockets, asyncio, threading, queue
 from modules.VTS.discover_server import discover_vtube_studio_server, SERVER_IP, SERVER_PORT
 from modules.VTS.API_requests import VTS_MODELS, VTS_EXPRESSIONS, send, IS_CONNECTED, IS_AUTH
 import modules.VTS.API_requests as API_requests
 import modules.VTS.API_subs as API_subs
 import modules.VTS.API_events as API_events
-
+import sys
+import os
+from time import sleep
 # function variables
 # queue setup { function, args}
 async def setup():
@@ -35,7 +37,7 @@ async def start_websocket_connection(send):
             try:
                 async with websockets.connect(uri) as ws:
                     while True:  # Infinite loop to keep the connection alive
-                        if not send.empty():
+                        while not send.empty():
                             list = send.get_nowait()
                             func_to_call, arg = list[0], list[1]
                             emit_socketio_event("vts_debug1", f"Calling {func_to_call.__name__} with arg {arg}")
@@ -44,7 +46,11 @@ async def start_websocket_connection(send):
                             else:
                                 await func_to_call(ws)
                         else:
-                            await API_events.Listen(ws)
+                            response = await ws.recv()
+                            emit_socketio_event("vts_debug2", f"Received: {response}")
+                            if response is None:
+                                break
+                            await API_events.Listen(response)
                         if ws.closed:
                             break
 
@@ -52,19 +58,19 @@ async def start_websocket_connection(send):
                     
                     
             except websockets.InvalidStatusCode as e:
-                emit_socketio_event("vts_debug", f"Error: {e} {type(e)} {e.args} {e.__context__} {e.__traceback__.tb_lineno}")
+                report_error("vts_error")
                 IS_AUTH = False
                 IS_CONNECTED = False
                 await setup()
                 SERVER_IP, SERVER_PORT = "", None
             except websockets.ConnectionClosed:
-                emit_socketio_event("vts_debug", "Connection closed")
+                report_error("vts_error")
                 IS_AUTH = False
                 IS_CONNECTED = False
                 SERVER_IP, SERVER_PORT = "", None  # Reset IP and port to trigger rediscovery
                 await setup()
             except Exception as e:
-                emit_socketio_event("vts_debug", f"Error: {e} {type(e)} {e.args} {e.__context__} {e.__traceback__.tb_lineno}")
+                report_error("vts_error")
                 IS_AUTH = False
                 IS_CONNECTED = False
                 await setup()
@@ -76,6 +82,7 @@ async def start_websocket_connection(send):
 def initiate_vtstudio_connection():
     try:
         def run(send):
+            sleep(5)
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             loop.run_until_complete(start_websocket_connection(send))

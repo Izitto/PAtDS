@@ -1,7 +1,7 @@
 import json
 from flask_socketio import SocketIO, emit
 from app import app
-import requests
+import requests, sys, os
 
 socketio = SocketIO(app)
 with open('/home/izitto/Desktop/Code/PAtDS/user_configs.json', 'r') as file:
@@ -58,3 +58,14 @@ def make_get_request(route, port):
     except requests.exceptions.RequestException as e:
         print(f"Error making GET request: {e}")
         return e
+    
+
+def report_error(error_name: str):
+    e_type, e_object, e_traceback = sys.exc_info()
+    e_filename = os.path.split(
+        e_traceback.tb_frame.f_code.co_filename
+    )[1]
+    e_line_number = e_traceback.tb_lineno
+    e_column = e_traceback.tb_frame.f_code.co_firstlineno
+    e_object = e_object
+    emit_socketio_event(error_name, f"Error: {e_type} {e_object} {e_traceback} {e_filename} {e_line_number} {e_column}")

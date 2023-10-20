@@ -3,9 +3,9 @@ from modules.VTS.objects import VTS_MODELS, VTS_EXPRESSIONS, Model, Expression
 from modules.shared import emit_socketio_event
 
 
-async def Listen(ws):
-    response = await ws.recv()
-    response_data: dict = json.loads(response)
+async def Listen(response):
+    # response = await ws.recv()
+    response_data= json.loads(response)
     if response_data.get('messageType', str()) == "ModelLoadedEvent":
         emit_socketio_event("vts_debug", "model changed")
         VTS_MODELS.setModelSatus(response_data.get('data', {}).get('modelID', []), response_data.get('data', {}).get('modelLoaded', []))

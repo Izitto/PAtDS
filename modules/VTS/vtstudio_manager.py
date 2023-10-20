@@ -18,7 +18,7 @@ async def vts_home():
 
 @app.route('/vts/api/loadModel', methods=['POST'])
 async def loadModel():
-    print("loadModel() called")
+    emit_socketio_event("vts_api", "loadModel() called")
     Model_ID = request.form['Model_ID']
     await vtstudio.sender(API_requests.loadModel, Model_ID)
     emit_socketio_event("vts_debug", "model request: " + Model_ID)
@@ -28,7 +28,7 @@ async def loadModel():
 
 @app.route('/vts/api/setExpression', methods=['POST'])
 def setExpression():
-    print("setExpression() called")
+    emit_socketio_event("vts_api", "setExpression() called")
     file = request.form['file']
     active = request.form['active']
     # API_requests.req_expression = {"file": file, "status": active}

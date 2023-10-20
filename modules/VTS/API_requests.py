@@ -119,9 +119,9 @@ async def loadModel(ws, model_id):
         }
     }
     await ws.send(json.dumps(header))
-    response = await ws.recv()
-    response_data = json.loads(response)
-    emit_socketio_event("vts_debug", response_data)
+    # response = await ws.recv()
+    # response_data = json.loads(response)
+    # emit_socketio_event("vts_debug", response_data)
 
 async def setExpression(ws, expression):
     # global req_expression
@@ -136,9 +136,9 @@ async def setExpression(ws, expression):
     }
     # if req_expression['file'] != None and req_expression['status'] != None:
     await ws.send(json.dumps(header))
-    response = await ws.recv()
-    response_data = json.loads(response)
-    emit_socketio_event("vts_debug", response_data)
+    # response = await ws.recv()
+    # response_data = json.loads(response)
+    # emit_socketio_event("vts_debug", response_data)
     # expression = { "file": None, "status": None}
 
 async def dummy(ws):
