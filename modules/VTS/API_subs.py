@@ -1,7 +1,6 @@
 
 import json
-from modules.shared import emit_socketio_event
-
+from modules.shared import emit_socketio_event, report_error
 
 async def ModelSub(ws):
     header = {
@@ -16,10 +15,14 @@ async def ModelSub(ws):
             }
         }
     }
-    await ws.send(json.dumps(header))
-    response = await ws.recv()
-    response_data = json.loads(response)
-    emit_socketio_event("vts_debug", "model sub response: " + str(response_data))
+    try:
+        await ws.send(json.dumps(header))
+        response = await ws.recv()
+        response_data = json.loads(response)
+        emit_socketio_event("vts_sub_log", "model sub response: " + str(response_data))
+    except Exception as e:
+        report_error("vts_sub_bug")
+        emit_socketio_event("vts_sub_bug", "model sub response: " + str(e))
 
 async def HotkeySub(ws):
     header = {
@@ -30,12 +33,15 @@ async def HotkeySub(ws):
             "eventName": "HotkeyTriggeredEvent",
             "subscribe": True,
             "config": {
-                "onlyForAction": "ToggleExpression",
                 "ignoreHotkeysTriggeredByAPI": False
             }
         }
     }
-    await ws.send(json.dumps(header))
-    response = await ws.recv()
-    response_data = json.loads(response)
-    emit_socketio_event("vts_debug", "hotkey sub response: " + str(response_data))
+    try:    
+        await ws.send(json.dumps(header))
+        response = await ws.recv()
+        response_data = json.loads(response)
+        emit_socketio_event("vts_sub_log", "hotkey sub response: " + str(response_data))
+    except Exception as e:
+        report_error("vts_sub_bug")
+        emit_socketio_event("vts_sub_bug", "hotkey sub response: " + str(e))
