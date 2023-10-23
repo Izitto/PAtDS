@@ -1,21 +1,18 @@
-from flask import Flask, jsonify, request, render_template, redirect, url_for, flash
-import requests
-import json
-import os
+from flask import jsonify, request, render_template
 from app import app
 import modules.VTS.vtstudio as vtstudio
+from modules.VTS.objects import VTS_COORDS, VTS_MODELS, VTS_EXPRESSIONS
 from modules.VTS.send_queue import sender
 import modules.VTS.API_requests as API_requests
-import asyncio
 from modules.shared import emit_socketio_event
+
 # pages
-import asyncio
+
 @app.route('/vts/home')
 async def vts_home():
-    models = API_requests.VTS_MODELS.getModels()
-    expressions = vtstudio.VTS_EXPRESSIONS.getExpressions()
+    return render_template('vts_manager/home.html')
 
-    return render_template('vts_manager/home.html', models=models, expressions=expressions)
+# API ENDPOINTS /vts/api/...
 
 @app.route('/vts/api/loadModel', methods=['POST'])
 async def loadModel():
@@ -35,14 +32,19 @@ async def setExpression():
     return jsonify({'success': True})
 
 
-# API ENDPOINTS /vts/api/...
+
 
 @app.route('/vts/api/models')
 def models():
-    models = API_requests.VTS_MODELS.toJSON()
+    models = VTS_MODELS.toJSON()
     return jsonify(success=True, models=models)
 
 @app.route('/vts/api/expressions')
 def expressions():
-    expressions = vtstudio.VTS_EXPRESSIONS.toJSON()
+    expressions = VTS_EXPRESSIONS.toJSON()
     return jsonify(success=True, expressions=expressions)
+
+@app.route('/vts/api/coords')
+def coords():
+    coords = VTS_COORDS.toJSON()
+    return jsonify(success=True, coords=coords)

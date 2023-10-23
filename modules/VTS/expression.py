@@ -48,6 +48,10 @@ class Expressions:
             if expression.file == file:
                 expression.setState(active)
 
+    def setExpressionsStatus(self, expressions):
+        for expression in expressions:
+            self.setExpressionStatus(expression['file'], expression['active'])
+
     def toStr(self):
         return str(self.expressions)
     

@@ -15,14 +15,7 @@ async def ModelSub(ws):
             }
         }
     }
-    try:
-        await ws.send(json.dumps(header))
-        response = await ws.recv()
-        response_data = json.loads(response)
-        emit_socketio_event("vts_sub_log", "model sub response: " + str(response_data))
-    except Exception as e:
-        report_error("vts_sub_bug")
-        emit_socketio_event("vts_sub_bug", "model sub response: " + str(e))
+    await ws.send(json.dumps(header))
 
 async def HotkeySub(ws):
     header = {
@@ -37,11 +30,21 @@ async def HotkeySub(ws):
             }
         }
     }
-    try:    
-        await ws.send(json.dumps(header))
-        response = await ws.recv()
-        response_data = json.loads(response)
-        emit_socketio_event("vts_sub_log", "hotkey sub response: " + str(response_data))
-    except Exception as e:
-        report_error("vts_sub_bug")
-        emit_socketio_event("vts_sub_bug", "hotkey sub response: " + str(e))
+    await ws.send(json.dumps(header))
+
+async def ModelMoveSub(ws):
+    header = {
+        "apiName": "VTubeStudioPublicAPI",
+        "apiVersion": "1.0",
+        "messageType": "EventSubscriptionRequest",
+        "data": {
+            "eventName": "ModelMovedEvent",
+            "subscribe": True,
+            "config": {
+                
+            }
+        }
+    }
+    await ws.send(json.dumps(header))
+
+

@@ -34,16 +34,7 @@ async def authenticate_with_server(ws):
                 "pluginDeveloper": DEVELOPER_NAME,
             }
         }
-        await ws.send(json.dumps(header))
-        response = await ws.recv()
-        response_data = json.loads(response)
-        # If a token is received from the server, store it in the text file
-        if response_data.get('data', {}).get('authenticationToken'):
-            token = response_data['data']['authenticationToken']
-            with open(TOKEN_PATH, 'w') as token_file:
-                token_file.write(token)
-
-    global IS_AUTH
+        
     # Send the token to the server to authenticate the plugin connection
     if token:
         header = {
@@ -57,13 +48,6 @@ async def authenticate_with_server(ws):
             }
         }
     await ws.send(json.dumps(header))
-    response = await ws.recv()
-    response_data = json.loads(response)
-    if response_data.get('data', {}).get('authenticated') is True:
-        emit_socketio_event("vts_req_log", "Authenticated with VTube Studio")
-    else:
-        emit_socketio_event("vts_req_log", "Authentication with VTube Studio failed")
-        emit_socketio_event("vts_req_log", response_data)
 
 
 async def fetch_vts_models(ws):
@@ -72,16 +56,7 @@ async def fetch_vts_models(ws):
         "apiVersion": "1.0",
         "messageType": "AvailableModelsRequest"
     }
-    try:
-        await ws.send(json.dumps(header))
-        response = await ws.recv()
-        response_data = json.loads(response)
-        # Extract model names and IDs and store them in the global VTS_MODELS array
-        # add models
-        VTS_MODELS.addModels([Model(model["modelName"], model["modelID"], model["modelLoaded"]) for model in response_data.get('data', {}).get('availableModels', [])])
-        # emit_socketio_event("vts_debug", VTS_MODELS.toStr())
-    except Exception as e:
-        emit_socketio_event("vts_req_bug", f"Error: {e} {type(e)} {e.args} {e.__traceback__.tb_lineno}")
+    await ws.send(json.dumps(header))
 
 
 async def fetch_vts_expressions(ws):
@@ -94,18 +69,7 @@ async def fetch_vts_expressions(ws):
             "details": True
         }
     }
-    try:
-        await ws.send(json.dumps(header))
-        response = await ws.recv()
-        response_data = json.loads(response)
-        # Extract extract name, file and active status and store them in the global VTS_EXPRESSIONS array
-        # Expressions.addExpression([Expression(expression["name"], expression["file"], expression["active"]) for expression in response_data.get('data', {}).get('expressionState', [])])
-        # add expressions
-        VTS_EXPRESSIONS.addExpressions([Expression(expression["name"], expression["file"], expression["active"]) for expression in response_data.get('data', {}).get('expressions', [])])
-        # emit_socketio_event("vts_debug", VTS_EXPRESSIONS.toStr())
-        # emit_socketio_event("vts_debug", response_data)
-    except Exception as e:
-        emit_socketio_event("vts_req_bug", f"Error: {e} {type(e)} {e.args} {e.__traceback__.tb_lineno}")
+    await ws.send(json.dumps(header))
 
 async def loadModel(ws, model_id):
     # global req_model_id
@@ -119,27 +83,17 @@ async def loadModel(ws, model_id):
         }
     }
     await ws.send(json.dumps(header))
-    await sender(fetch_vts_expressions, None)
-    # response = await ws.recv()
-    # response_data = json.loads(response)
-    # emit_socketio_event("vts_debug", response_data)
 
 async def setExpression(ws, expression):
     # global req_expression
     header = {
         "apiName": "VTubeStudioPublicAPI",
         "apiVersion": "1.0",
-        "messageType": "SetExpressionRequest",
+        "messageType": "ExpressionActivationRequest",
         "data": {
             "expressionFile": expression['file'],
             "active": expression['status']
         }
     }
-    # if req_expression['file'] != None and req_expression['status'] != None:
     await ws.send(json.dumps(header))
-    await sender(fetch_vts_expressions, None)
-    # response = await ws.recv()
-    # response_data = json.loads(response)
-    # emit_socketio_event("vts_debug", response_data)
-    # expression = { "file": None, "status": None}
 
