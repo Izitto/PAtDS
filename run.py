@@ -3,6 +3,7 @@ from app import app
 import asyncio, threading
 import atexit
 import modules.VTS.vtstudio as vtstudio
+import modules.TBOT.bot as bot
 
 # Cleanup function
 def cleanup():

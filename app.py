@@ -5,17 +5,21 @@ import modules
 import pymysql
 from flask import Flask, request, render_template, current_app, jsonify, session, redirect, url_for, flash, send_from_directory, send_file
 from flask_cors import CORS
-import bcrypt
 import logging
 import os
-import ipaddress
-import hashlib
-import json
+from flask_webpack import Webpack
 app = Flask(__name__, template_folder='/home/izitto/Desktop/Code/PAtDS/templates',
             static_folder='/home/izitto/Desktop/Code/PAtDS/static', )
+
+Webpack = Webpack()
+params = {
+        'DEBUG': True,
+        'WEBPACK_MANIFEST_PATH': '/home/izitto/Desktop/Code/PAtDS/build/manifest.json'
+    }
 CORS(app)
 app.config["SECRET_KEY"] = "secret!"
-
+app.config.update(params)
+Webpack.init_app(app)
 # Create logs directory if it doesn't exist
 log_dir = os.path.join(app.static_folder, 'logs')
 if not os.path.exists(log_dir):

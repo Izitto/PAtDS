@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Position Manager</title>
+    <!-- Add any additional CSS or JS links here if needed -->
+</head>
+
+<body>
+    <div class="container">
+        <h1>Position Manager</h1>
+        <h2>Models</h2>
+        <div class="models-container">
+        </div>
+        <h2>Current Coords</h2>
+        <div class="coords-container">
+        </div>
+        <h2>Position</h2>
+        <div class="position-container">
+            <!--
+                example of dynamically added buttons
+                <button class="position-button" modelId="modelID" positionName="positionName">position name</button>
+            -->
+        </div>
+        <button class="add-pos">Add Position</button>
+        <div class="position-data-container">
+        </div>
+        <button class="save-pos">Save Position</button>
+        <button class="delete-pos">Delete Position</button>
+
+    </div>
+
+    <!-- Add any additional HTML content or scripts here if needed -->
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <script type="text/javascript" src="{{url_for('static', filename='script/vts_scripts.js')}}">
+    </script>
+    <script>
+        saveModelPositions();
+        getCoords();
+        getModels();
+        populateCoords();
+        populateModels();
+        socketCoords();
+        socketModels();
+        getPositions();
+        populatePositionData();
+        populatePositions();
+        
+    </script>
+</body>
+
+</html>

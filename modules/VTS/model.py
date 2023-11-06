@@ -62,3 +62,9 @@ class Models:
     
     def toJSON(self):
         return [model.toJSON() for model in self.models]
+    
+    def getActiveModelIDandName(self):
+        for model in self.models:
+            if model.active == True:
+                return model.id, model.name
+        return None, None

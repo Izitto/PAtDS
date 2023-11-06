@@ -97,3 +97,20 @@ async def setExpression(ws, expression):
     }
     await ws.send(json.dumps(header))
 
+
+async def moveModel(ws, model_id, position):
+    header = {
+        "apiName": "VTubeStudioPublicAPI",
+        "apiVersion": "1.0",
+        "messageType": "MoveModelRequest",
+        "data": {
+            "modelID": model_id,
+            "timeInSeconds": position['timeInSeconds'],
+            "valuesAreRelativeToModel": position['valuesAreRelativeToModel'],
+            "positionX": position['positionX'],
+            "positionY": position['positionY'],
+            "rotation": position['rotation'],
+            "size": position['size']
+        }
+    }
+    await ws.send(json.dumps(header))

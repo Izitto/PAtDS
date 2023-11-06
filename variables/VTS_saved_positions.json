@@ -1,0 +1,19 @@
+{
+    "Model_Positions": [
+        {
+            "name": "model_name",
+            "id": "model_id",
+            "positions": [
+                {
+                    "name": "position name",
+                    "timeInSeconds": "5",
+                    "valuesAreRelativeToModel": "relative",
+                    "positionX": "5",
+                    "positionY": "5",
+                    "rotation": "10",
+                    "size": "3"
+                }
+            ]
+        }
+    ]
+}

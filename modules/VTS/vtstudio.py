@@ -30,7 +30,7 @@ async def send_messages(ws, send_queue):
                 await func_to_call(ws, arg)
             else:
                 await func_to_call(ws)
-        await asyncio.sleep(0.01)
+        await asyncio.sleep(0.05)
 
 async def receive_messages(ws):
     while True:
