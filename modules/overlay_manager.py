@@ -75,8 +75,3 @@ def get_sources():
         return jsonify({"message": "An error occurred while retrieving the sources.", "error": str(e)}), 500
 
 
-@app.route('/api/friend_list')
-def get_friend_list():
-    with open('/home/izitto/Desktop/Code/PAtDS/static/friends.txt', 'r') as f:
-        friend_list = [line.strip() for line in f.readlines()]
-    return jsonify(friend_list)

@@ -75,7 +75,7 @@ def save_temp_bg():
 @app.route('/api/commands', methods=['POST'])
 def commands():
     print("Called: /api/commands")
-    term = request.form['term']
+    term = request.json.get('term')
     control.commands(term)
     return jsonify(screen=control.screen, ccard=control.ccard)
 
@@ -90,7 +90,7 @@ def get_HDMI():
 @app.route('/api/notify_neko', methods=['POST'])
 def notify_neko():
     print("Called: /api/notify_neko")
-    up = request.form['up']
+    up = request.json.get('up')
     shared.emit_socketio_event('wake_up', 'hello')
     shared.emit_socketio_event('neko_state', {'up': up, })
     return "timer set"
@@ -99,7 +99,7 @@ def notify_neko():
 @app.route('/api/notify_derp', methods=['POST'])
 def notify_derp():
     print("Called: /api/notify_derp")
-    up = request.form['up']
+    up = request.json.get('up')
     shared.emit_socketio_event('wake_up', 'hello')
     shared.emit_socketio_event('derp_state', {'up': up, })
     return "notification sent"
@@ -109,7 +109,7 @@ def notify_derp():
 def set_timer():
     print("Called: /api/set_neko_timer")
     global neko_timer
-    neko_timer = request.form['timer']
+    neko_timer = request.json.get('timer')
     shared.emit_socketio_event('neko_timer_updated', {
                                'message': 'Neko timer updated'})
     return "timer set"
@@ -119,7 +119,7 @@ def set_timer():
 def set_derp_timer():
     print("Called: /api/set_derp_timer")
     global derp_timer
-    derp_timer = request.form['timer']
+    derp_timer = request.json.get('timer')
     shared.emit_socketio_event('derp_timer_updated', {
                                'message': 'Derp timer updated'})
     return "timer set"
@@ -239,3 +239,10 @@ def get_user_configs():
     else:
         return jsonify(user_configs[object][value]), 200
 
+
+
+@app.route('/api/friend_list')
+def get_friend_list():
+    with open('/home/izitto/Desktop/Code/PAtDS/static/friends.txt', 'r') as f:
+        friend_list = [line.strip() for line in f.readlines()]
+    return jsonify(friend_list)

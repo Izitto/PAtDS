@@ -60,7 +60,7 @@ function countdown() {
                 $.ajax({
                     type: "POST",
                     url: "/api/notify_neko",
-                    data: {up: neko_up}
+                    data: {"up": neko_up}
                 });
                 poofSound.play();
                 nekoSound.pause();
@@ -73,7 +73,7 @@ function countdown() {
                 $.ajax({
                     type: "POST",
                     url: "/api/notify_neko",
-                    data: {up: neko_up}
+                    data: {"up": neko_up}
                 });
                 nekoSound.play();
             }
