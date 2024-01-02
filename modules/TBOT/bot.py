@@ -1,53 +1,22 @@
-from modules.shared import emit_socketio_event, report_error
-import asyncio, threading, queue
-from twitchio.ext import commands
-from time import sleep
+from twitchio.ext import commands, eventsub, pubsub
+import os
 
-# Define the bot's token, prefix, and initial channels
-bot_token = '5d22t69yjjq4gjbb9y6u2oknh0wgmo'
-bot_prefix = '?'
-initial_channels = ['izitto']
-
-# Create a bot instance
 bot = commands.Bot(
-    token=bot_token,
-    prefix=bot_prefix,
-    initial_channels=initial_channels
+    token= 'p33eyj9qau8guxiekwgytaw28u0yfj',
+
+    nick = 'izittobot',
+    prefix = '!',
+    initial_channels = ["izitto"]
 )
 
-class Bot(commands.Bot):
+@bot.event()
+async def event_ready():
+    print(f'Logged into Twitch | {bot.nick}')
+    print(f'Channels: {bot.connected_channels}')
 
-    def __init__(self):
-        # Initialise our Bot with our access token, prefix and a list of channels to join on boot...
-        super().__init__(token=bot_token, prefix=bot_prefix, initial_channels=[initial_channels[0]])
-
-    async def event_ready(self):
-        # We are logged in and ready to chat and use commands...
-        print(f'Logged in as | {self.nick}')
-        print(f'User id is | {self.user_id}')
-
-    @commands.command()
-    async def hello(self, ctx: commands.Context):
-        # Send a hello back!
-        await ctx.send(f'Hello {ctx.author.name}!')
+@bot.event()
+async def event_message(message):
+    print(message.content)
 
 
-bot = Bot()
-bot.run()
 
-
-def initiate_tbot_connection():
-    try:
-        def run(send_queue):
-            sleep(5)
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            loop.run_until_complete('''start bot''')
-
-        thread = threading.Thread(target=run, args=(send,))
-        thread.daemon = True
-        thread.start()
-        return thread
-    except Exception as e:
-        report_error("tbot_thread_error")
-        return None
