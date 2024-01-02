@@ -2,7 +2,7 @@ from twitchio.ext import commands, eventsub, pubsub
 import os
 
 bot = commands.Bot(
-    token= 'p33eyj9qau8guxiekwgytaw28u0yfj',
+    token= '',
 
     nick = 'izittobot',
     prefix = '!',
