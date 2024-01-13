@@ -4,6 +4,8 @@ from app import app
 import requests, sys, os
 
 socketio = SocketIO(app)
+
+
 with open('/home/izitto/Desktop/Code/PAtDS/user_configs.json', 'r') as file:
     user_configs = json.load(file)
 host = user_configs['DB']['host']

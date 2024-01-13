@@ -8,7 +8,7 @@ import os
 
 # route for system stats
 
-@app.route('/stats', methods=['GET'])
+@app.route('/api/stats', methods=['GET'])
 def system_stats():
     cpu_usage = psutil.cpu_percent()
     mem_usage = psutil.virtual_memory().percent

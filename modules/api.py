@@ -13,7 +13,7 @@ database = shared.database
 viewer = shared.viewer
 friend = shared.friend
 import os
-
+# import modules.module_control as module_control
 # route for audio files
 @app.route('/api/audio/<filename>', methods=['GET'])
 def get_audio(filename):
@@ -246,3 +246,20 @@ def get_friend_list():
     with open('/home/izitto/Desktop/Code/PAtDS/static/friends.txt', 'r') as f:
         friend_list = [line.strip() for line in f.readlines()]
     return jsonify(friend_list)
+
+'''
+@app.route('/api/modules/start', methods=['POST'])
+def start_modules():
+    module_control.start()
+    return "module started"
+
+@app.route('/api/modules/kill', methods=['POST'])
+def kill_modules():
+    module_control.kill()
+    return "module killed"
+
+@app.route('/api/modules/status', methods=['POST'])
+def module_status():
+    return jsonify(module_control.status())
+'''
+

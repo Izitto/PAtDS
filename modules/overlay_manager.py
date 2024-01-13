@@ -149,22 +149,29 @@ def save_sources(source):
 
 # new endpoints with better data structure
 
+import json, uuid, os
+from modules.DB import insert_overlay, get_overlay, get_overlays, insert_source, get_source, get_sources, dump_db
+
 @app.route('/api/v2/save_overlays', methods=['POST'])
 def save_overlays_route():
-    save_overlays(request.json)
+    insert_overlay(request.json)
     return jsonify({"message": "Overlays saved successfully!"}), 200
 
 
 
 @app.route('/api/v2/load_overlays', methods=['GET'])
 def load_overlays_route():
-    return jsonify(Overlays), 200
+    return jsonify(get_overlays()), 200
 
 @app.route('/api/v2/save_sources', methods=['POST'])
 def save_sources_route():
-    save_sources(request.json)
+    insert_source(request.json)
     return jsonify({"message": "Sources saved successfully!"}), 200
 
 @app.route('/api/v2/load_sources', methods=['GET'])
 def load_sources_route():
-    return jsonify(Sources), 200
+    return jsonify(get_source), 200
+
+@app.route('/api/v2/dump_db', methods=['GET'])
+def dump_db_route():
+    return jsonify(dump_db()), 200

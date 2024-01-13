@@ -1,0 +1,31 @@
+{
+    "id": 1,
+    "name": "Test",
+    "script": "",
+    "sources": [
+        {
+            "height": 1080,
+            "id": 1,
+            "name": "timers",
+            "scale": 1,
+            "url": "http://patds/timers",
+            "uuid": "499fab93-b043-4cc1-9cfb-642d5c4a4f3a",
+            "width": 1920,
+            "x": 0,
+            "y": 0
+        },
+        {
+            "height": 1080,
+            "id": 2,
+            "name": "friends",
+            "scale": 1,
+            "url": "http://patds/friends",
+            "uuid": "635efe3c-af69-4acd-97d8-74d12c7262a4",
+            "width": 1920,
+            "x": 0,
+            "y": 0
+        }
+    ],
+    "style": "",
+    "uuid": "b67f3aaa-1b0f-4b26-b520-f18894baeb93"
+}
