@@ -133,7 +133,10 @@
     <script>
         let coverFlipped = false;
         let backgroundFlipped = false;
-
+        document.getElementById('effectColor').addEventListener('input', updateCanvas);
+        let activeEffects = [];
+        let API_Key;
+        let CX;
         function flipCover() {
             coverFlipped = !coverFlipped;
             updateCanvas();
@@ -143,10 +146,7 @@
             backgroundFlipped = !backgroundFlipped;
             updateCanvas();
         }
-        document.getElementById('effectColor').addEventListener('input', updateCanvas);
-        let activeEffects = [];
-        let API_Key;
-        let CX;
+        
         fetch("/api/get_user_configs?group=API-KEYS&object=Google-Search&value=API-Key")
             .then((response) => response.json())
             .then(data => API_KEY = data);

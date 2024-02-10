@@ -149,8 +149,9 @@ def commands(term):
     else:
         print("no command found")
     
-    shared.emit_socketio_event('HDMI_updated', {'message': 'HDMI updated'})
-    shared.emit_socketio_event('HDMI_updated', {'message': ''})
+    # shared.emit_socketio_event('HDMI_updated', {'message': 'HDMI updated'})
+    # shared.emit_socketio_event('HDMI_updated', {'message': ''})
+    shared.emit_socketio_event('HDMI_updated', {'A': screen, 'B': ccard})
 
         
 

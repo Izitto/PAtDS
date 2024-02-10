@@ -1,9 +1,9 @@
 import modules.Control as control
-from flask import render_template, request, jsonify, send_from_directory, abort
+from flask import request, jsonify, send_from_directory, abort
 from app import app
-import pymysql
 import requests
 import modules.shared as shared
+import modules.DB as DB
 neko_timer = shared.neko_timer
 derp_timer = shared.derp_timer
 host = shared.host
@@ -15,6 +15,8 @@ friend = shared.friend
 import os
 # import modules.module_control as module_control
 # route for audio files
+
+'''
 @app.route('/api/audio/<filename>', methods=['GET'])
 def get_audio(filename):
     print("Called: /api/audio/" + filename)
@@ -247,6 +249,8 @@ def get_friend_list():
         friend_list = [line.strip() for line in f.readlines()]
     return jsonify(friend_list)
 
+
+'''
 '''
 @app.route('/api/modules/start', methods=['POST'])
 def start_modules():
@@ -262,4 +266,94 @@ def kill_modules():
 def module_status():
     return jsonify(module_control.status())
 '''
+# route to get files from the server
+@app.route('/api/download/<path>/<filename>', methods=['GET'])
+def download(path, filename):
+    full_path = app.static_folder + '/' + path + "/"
+    try:
+        return send_from_directory(full_path, filename, as_attachment=True)
+    except FileNotFoundError:
+        abort(404)
 
+# route to upload files to the server
+@app.route('/api/upload/<path>/<filename>', methods=['POST'])
+def upload(path, filename):
+    file = request.files['file']
+    full_path = app.static_folder + '/' + path + "/"
+    try:
+        file.save(full_path + filename)
+        return "file saved"
+    except FileNotFoundError:
+        abort(404)
+
+# commands to control gpio and other things
+@app.route('/api/commands', methods=['POST'])
+def commands():
+    print("Called: /api/commands")
+    term = request.json.get('term')
+    # try if fails, try again until it works
+    try:
+        control.commands(term)
+        shared.emit_socketio_event('HDMI_updated', {'A': control.screen, 'B': control.ccard})
+        return "success"
+    except:
+        abort(500)
+
+# trigger for redeems
+@app.route('/api/ol_trigger', methods=['POST'])
+def notify_neko():
+    type = request.json.get('type')
+    data = request.json.get('data')
+    # todo add some handler for any redeem type
+    shared.emit_socketio_event('ol_trigger', {'type': type, 'data': data})
+
+# keep alive
+@app.route('/api/keep_alive', methods=['POST'])
+def keep_alive():
+    return jsonify({'status': 'success', 'message': 'Connection kept alive'}), 200
+
+
+# database routes
+@app.route('/api/db/dump', methods=['GET'])
+def dump_db():
+    return jsonify(DB.dump_db())
+
+@app.route('/api/db/drop_all', methods=['GET'])
+def drop_all():
+    return jsonify(DB.drop_all())
+
+@app.route('/api/db/load/olm_overlays', methods=['GET'])
+def load_olm_overlays():
+    uuid = request.args.get('uuid')
+    if uuid is None or uuid == "" or uuid == "all":
+        return jsonify(DB.get_overlays())
+    else:
+        return jsonify(DB.get_overlay(uuid))
+'''
+@app.route('/api/db/load/olm_sources', methods=['GET'])
+def load_olm_sources():
+    uuid = request.json.get('uuid')
+    if uuid is None or uuid == "":
+        return jsonify(DB.get_sources())
+    # else if uuid is array
+    else:
+        return jsonify(DB.get_source(uuid))
+    '''
+@app.route('/api/db/save/olm_overlays', methods=['POST'])
+def save_olm_overlays():
+    DB.insert_overlay(request.json)
+    return "overlay saved"
+'''
+@app.route('/api/db/save/olm_sources', methods=['POST'])
+def save_olm_sources():
+    DB.insert_source(request.json)
+    return "source saved"
+
+'''
+
+# delete overlay, search by uuid
+@app.route('/api/db/delete/olm_overlay', methods=['POST'])
+def delete_olm_overlays():
+    uuid = request.args.get('uuid')
+    DB.delete_overlay(uuid)
+    return "overlay deleted"

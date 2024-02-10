@@ -1,6 +1,6 @@
 
-import modules.Control as Control
-import modules.VTS.vtstudio as vtstudio
+# import modules.Control as Control
+# import modules.VTS.vtstudio as vtstudio
 # import modules.TBOT.bot as bot
 from app import app
 # start with gunicorn -c gunicorn_config.py run:app
@@ -44,7 +44,7 @@ def init_app():
 # app = app
 import eventlet
 from eventlet import wsgi
-eventlet.monkey_patch(socket=True, select=True, time=True)
+# eventlet.monkey_patch(socket=True, select=True, time=True)
 if __name__ == '__main__':
     wsgi.server(eventlet.listen(("0.0.0.0", 8000)), app)
     # app.run(debug=True, host='0.0.0.0', port=8000)

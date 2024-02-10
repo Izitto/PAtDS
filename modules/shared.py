@@ -1,9 +1,7 @@
 import json
 from flask_socketio import SocketIO, emit
-from app import app
+from app import app, socketio
 import requests, sys, os
-
-socketio = SocketIO(app)
 
 
 with open('/home/izitto/Desktop/Code/PAtDS/user_configs.json', 'r') as file:
