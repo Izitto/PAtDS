@@ -12,9 +12,11 @@ import os
 app = Flask(__name__, template_folder='/home/izitto/Desktop/Code/PAtDS/templates',
             static_folder='/home/izitto/Desktop/Code/PAtDS/static', )
 
-socketio = flask_socketio.SocketIO(app, cors_allowed_origins="*")
+socketio = flask_socketio.SocketIO(app, async_mode='eventlet')
 CORS(app)
 app.config["SECRET_KEY"] = "secret!"
 import modules
+# import thread_manager.py from same directory
+import thread_manager
 
 

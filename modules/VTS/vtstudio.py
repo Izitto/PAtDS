@@ -9,6 +9,10 @@ import sys
 import os
 from time import sleep
 from modules.VTS.send_queue import sender, send
+
+import eventlet
+from eventlet import greenio, greenthread
+eventlet.monkey_patch()
 # function variables
 # queue setup { function, args}
 
@@ -80,6 +84,7 @@ async def start_websocket_connection(send_queue):
                 SERVER_IP, SERVER_PORT = "", None
                 await asyncio.sleep(5)
 
+'''
 def initiate_vtstudio_connection():
     try:
         def run(send_queue):
@@ -92,6 +97,20 @@ def initiate_vtstudio_connection():
         thread.daemon = True
         thread.start()
         return thread
+    except Exception as e:
+        report_error("vts_thread_error")
+        return None
+'''
+def initiate_vtstudio_connection():
+    try:
+        def run(send_queue):
+            eventlet.sleep(5)  # Use eventlet.sleep for non-blocking sleep
+            # Directly use Eventlet to manage async operations
+            greenthread.spawn_n(start_websocket_connection, send_queue)
+
+        # Use Eventlet's spawn to start the process
+        gt = eventlet.spawn(run, send)
+        return gt
     except Exception as e:
         report_error("vts_thread_error")
         return None

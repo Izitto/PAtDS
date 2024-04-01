@@ -1,5 +1,6 @@
 # control system
-
+import eventlet
+eventlet.monkey_patch()
 import keyboard
 import sys
 import control.USB_switch as USB
@@ -197,7 +198,9 @@ def thread_control():
 
 con = threading.Thread(target=thread_control)
 def start():
-    con.start()
+    # Use Eventlet to spawn a new green thread
+    gt = eventlet.spawn(thread_control)
+    return gt
 
 def join():
     con.join()

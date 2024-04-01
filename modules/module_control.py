@@ -42,6 +42,7 @@ def exit_handler():
 atexit.register(exit_handler)
 '''
 
+"""
 import atexit
 import modules.Control as Control
 import modules.VTS.vtstudio as vtstudio
@@ -53,5 +54,27 @@ def exit_handler():
     Control.join()
     vtstudio_thread.join()
 
+
+atexit.register(exit_handler)
+"""
+
+import atexit
+import eventlet
+import modules.Control as Control
+import modules.VTS.vtstudio as vtstudio
+
+# Assuming Control.start() is adapted for Eventlet if needed
+Control.start()
+
+# This now returns a GreenThread object from Eventlet
+vtstudio_thread = vtstudio.initiate_vtstudio_connection()
+
+def exit_handler():
+    # For Control, ensure a proper shutdown or wait mechanism is implemented
+    # This is a placeholder; your actual implementation may vary
+    Control.shutdown()  # Assuming you implement a shutdown method
+
+    # Wait for the green thread to complete
+    vtstudio_thread.shutdown()
 
 atexit.register(exit_handler)

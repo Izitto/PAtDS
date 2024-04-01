@@ -20,7 +20,9 @@ var modelPositions = [
 ];
 
 var coords = {positionX: 0, positionY: 0, rotation: 0, size: 0};
-var socket = io(); // Initialize Socket.io connection
+//var socket = io(); // Initialize Socket.io connection
+//connect socketio to 192.168.0.107:8000
+var socket = io.connect('http://192.168.0.107:8000', {reconnect: true});
 
 function getModels() {
     fetch('/vts/api/models', {

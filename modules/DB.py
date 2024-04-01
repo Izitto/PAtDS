@@ -20,7 +20,7 @@ olm_sources = db.table('om_sources')
 
 search = Query()
 
-
+# overlays
 
 def insert_overlay(overlay):
     # check if overlay already exists with same uuid, if it does, update it
@@ -65,3 +65,4 @@ def get_overlay_list():
     for overlay in overlays:
         overlay_list.append({'name': overlay['name'], 'uuid': overlay['uuid']})
     return overlay_list
+

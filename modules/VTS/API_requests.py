@@ -9,7 +9,6 @@ expressions_fetched = False
 PLUGIN_NAME = "PAtDS"
 DEVELOPER_NAME = "Izitto"
 TOKEN_PATH = "/home/izitto/Desktop/Code/PAtDS/vts_token.txt"
-
 IS_CONNECTED = False
 IS_AUTH = False
 from modules.VTS.send_queue import sender
